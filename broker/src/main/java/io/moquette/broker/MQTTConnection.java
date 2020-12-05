@@ -23,6 +23,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.codec.mqtt.MqttProperties.MqttPropertyType;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE;
 import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
@@ -132,11 +134,22 @@ final class MQTTConnection {
         final String username = payload.userName();
         LOG.trace("Processing CONNECT message. CId={} username: {} channel: {}", clientId, username, channel);
 
-        if (isNotProtocolVersion(msg, MqttVersion.MQTT_3_1) && isNotProtocolVersion(msg, MqttVersion.MQTT_3_1_1)) {
+        if (isNotProtocolVersion(msg, MqttVersion.MQTT_3_1) &&
+            isNotProtocolVersion(msg, MqttVersion.MQTT_3_1_1) &&
+            isNotProtocolVersion(msg, MqttVersion.MQTT_5)
+        ) {
             LOG.warn("MQTT protocol version is not valid. CId={} channel: {}", clientId, channel);
             abortConnection(CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
             return;
         }
+        if (isNotProtocolVersion(msg, MqttVersion.MQTT_5)) {
+            handleConnect3(msg, clientId, username);
+        } else {
+            handleConnect5(msg, clientId, username);
+        }
+    }
+
+    private void handleConnect3(MqttConnectMessage msg, String clientId, String username) {
         final boolean cleanSession = msg.variableHeader().isCleanSession();
         if (clientId == null || clientId.length() == 0) {
             if (!brokerConfig.isAllowZeroByteClientId()) {
@@ -160,7 +173,7 @@ final class MQTTConnection {
 
         if (!login(msg, clientId)) {
             abortConnection(CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD);
-            channel.close().addListener(CLOSE_ON_FAILURE);
+            channel.close();
             return;
         }
 
@@ -175,10 +188,14 @@ final class MQTTConnection {
             return;
         }
 
-        final boolean msgCleanSessionFlag = msg.variableHeader().isCleanSession();
-        boolean isSessionAlreadyPresent = !msgCleanSessionFlag && result.alreadyStored;
+        boolean isSessionAlreadyPresent;
+        if (cleanSession)
+            isSessionAlreadyPresent = false;
+        else
+            isSessionAlreadyPresent = result.alreadyStored;
         final String clientIdUsed = clientId;
-        sendConnAck(isSessionAlreadyPresent).addListener(new ChannelFutureListener() {
+        final MqttConnAckMessage ackMessage = connAck(CONNECTION_ACCEPTED, isSessionAlreadyPresent);
+        channel.writeAndFlush(ackMessage).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
@@ -212,6 +229,193 @@ final class MQTTConnection {
 
             }
         });
+    }
+
+    static class ConnAckPropertiesBuilder {
+
+        private String clientId;
+        private Long sessionExpiryInterval;
+        private int receiveMaximum = 0;
+        private Byte maximumQos;
+        private boolean retain = false;
+        private Long maximumPacketSize;
+        private int topicAliasMaximum = 0;
+        private String reasonString;
+        private MqttProperties.UserProperties userProperties = new MqttProperties.UserProperties();
+        private Boolean wildcardSubscriptionAvailable;
+        private Boolean subscriptionIdentifiersAvailable;
+        private Boolean sharedSubscriptionAvailable;
+        private Integer serverKeepAlive;
+        private String responseInformation;
+        private String serverReference;
+        private String authenticationMethod;
+        private byte[] authenticationData;
+
+        public MqttProperties build() {
+            final MqttProperties props = new MqttProperties();
+            if (clientId != null) {
+                props.add(new MqttProperties.StringProperty(MqttPropertyType.ASSIGNED_CLIENT_IDENTIFIER.value(), clientId));
+            }
+            if (sessionExpiryInterval != null) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.SESSION_EXPIRY_INTERVAL.value(), sessionExpiryInterval.intValue()));
+            }
+            if (receiveMaximum > 0) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.RECEIVE_MAXIMUM.value(), receiveMaximum));
+            }
+            if (maximumQos != null) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.MAXIMUM_QOS.value(), receiveMaximum));
+            }
+            props.add(new MqttProperties.IntegerProperty(MqttPropertyType.RETAIN_AVAILABLE.value(), retain ? 1 : 0));
+            if (maximumPacketSize != null) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.MAXIMUM_PACKET_SIZE.value(), maximumPacketSize.intValue()));
+            }
+            props.add(new MqttProperties.IntegerProperty(MqttPropertyType.TOPIC_ALIAS_MAXIMUM.value(), topicAliasMaximum));
+            if (reasonString != null) {
+                props.add(new MqttProperties.StringProperty(MqttPropertyType.REASON_STRING.value(), reasonString));
+            }
+            props.add(userProperties);
+            if (wildcardSubscriptionAvailable != null) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.WILDCARD_SUBSCRIPTION_AVAILABLE.value(), wildcardSubscriptionAvailable ? 1 : 0));
+            }
+            if (subscriptionIdentifiersAvailable != null) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.SUBSCRIPTION_IDENTIFIER_AVAILABLE.value(), subscriptionIdentifiersAvailable ? 1 : 0));
+            }
+            if (sharedSubscriptionAvailable != null) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.SHARED_SUBSCRIPTION_AVAILABLE.value(), sharedSubscriptionAvailable ? 1 : 0));
+            }
+            if (serverKeepAlive != null) {
+                props.add(new MqttProperties.IntegerProperty(MqttPropertyType.SERVER_KEEP_ALIVE.value(), serverKeepAlive));
+            }
+            if (responseInformation != null) {
+                props.add(new MqttProperties.StringProperty(MqttPropertyType.RESPONSE_INFORMATION.value(), responseInformation));
+            }
+            if (serverReference != null) {
+                props.add(new MqttProperties.StringProperty(MqttPropertyType.SERVER_REFERENCE.value(), serverReference));
+            }
+            if (authenticationMethod != null) {
+                props.add(new MqttProperties.StringProperty(MqttPropertyType.AUTHENTICATION_METHOD.value(), authenticationMethod));
+            }
+            if (authenticationData != null) {
+                props.add(new MqttProperties.BinaryProperty(MqttPropertyType.AUTHENTICATION_DATA.value(), authenticationData));
+            }
+
+            return props;
+        }
+
+        public void sessionExpiryInterval(long seconds) {
+            this.sessionExpiryInterval = seconds;
+        }
+
+        public void receiveMaximum(int value) {
+            if (value <= 0) {
+                throw new IllegalArgumentException("receive maximum property must be > 0");
+            }
+            this.receiveMaximum = value;
+        }
+
+        public void maximumQos(byte value) {
+            if (value != 0 && value != 1) {
+                throw new IllegalArgumentException("maximum QoS property could be 0 or 1");
+            }
+            this.maximumQos = value;
+        }
+
+        public void retainAvailable(boolean retain) {
+            this.retain = retain;
+        }
+
+        public void maximumPacketSize(long size) {
+            if (size <= 0) {
+                throw new IllegalArgumentException("maximum packet size property must be > 0");
+            }
+            this.maximumPacketSize = size;
+        }
+
+        public void assignedClientId(String clientId) {
+            this.clientId = clientId;
+        }
+
+        public void topicAliasMaximum(int value) {
+            this.topicAliasMaximum = value;
+        }
+
+        public void reasonString(String reason) {
+            this.reasonString = reason;
+        }
+
+        public void userProperty(String name, String value) {
+            userProperties.add(name, value);
+        }
+
+        public void wildcardSubscriptionAvailable(boolean value) {
+            this.wildcardSubscriptionAvailable = value;
+        }
+
+        public void subscriptionIdentifiersAvailable(boolean value) {
+            this.subscriptionIdentifiersAvailable = value;
+        }
+
+        public void sharedSubscriptionAvailable(boolean value) {
+            this.sharedSubscriptionAvailable = value;
+        }
+
+        public void serverKeepAlive(int seconds) {
+            this.serverKeepAlive = seconds;
+        }
+
+        public void responseInformation(String value) {
+            this.responseInformation = value;
+        }
+
+        public void serverReference(String host) {
+            this.serverReference = host;
+        }
+
+        public void authenticationMethod(String methodName) {
+            this.authenticationMethod = methodName;
+        }
+
+        public void authenticationData(byte[] rawData) {
+            this.authenticationData = rawData;
+        }
+    }
+
+    private static MqttProperties withConnAckProps(Consumer<ConnAckPropertiesBuilder> consumer) {
+        final ConnAckPropertiesBuilder propsBuilder = new ConnAckPropertiesBuilder();
+        consumer.accept(propsBuilder);
+        return propsBuilder.build();
+
+    }
+
+    private void handleConnect5(MqttConnectMessage msg, String clientId, String username) {
+        final boolean cleanStart = msg.variableHeader().isCleanSession();
+        final MqttMessageBuilders.ConnAckBuilder ackBuilder = MqttMessageBuilders.connAck();
+        if (clientId == null || clientId.length() == 0) {
+            if (!cleanStart) {
+                LOG.info("MQTT client ID cannot be empty for persistent session. Username: {}, channel: {}",
+                    username, channel);
+                abortConnection(CONNECTION_REFUSED_IDENTIFIER_REJECTED);
+                return;
+            }
+
+            // Generating client id.
+            clientId = UUID.randomUUID().toString().replace("-", "");
+            LOG.debug("Client has connected with integration generated id: {}, username: {}, channel: {}", clientId,
+                username, channel);
+            final String generatedClientId = clientId;
+            ackBuilder.properties(withConnAckProps(p -> {
+                p.assignedClientId(generatedClientId);
+            }));
+        }
+
+        boolean isSessionAlreadyPresent = false; //TODO
+        final MqttConnAckMessage ackMessage = ackBuilder
+            .returnCode(CONNECTION_ACCEPTED)
+            .sessionPresent(isSessionAlreadyPresent)
+            .properties(withConnAckProps(p -> {
+                p.retainAvailable(true);
+            }))
+            .build();
     }
 
     private void setupInflightResender(Channel channel) {
@@ -304,11 +508,6 @@ final class MQTTConnection {
         String userName = NettyUtils.userName(channel);
         postOffice.dispatchConnectionLost(clientID,userName);
         LOG.trace("dispatch disconnection: clientId={}, userName={}", clientID, userName);
-    }
-
-    private ChannelFuture sendConnAck(boolean isSessionAlreadyPresent) {
-        final MqttConnAckMessage ackMessage = connAck(CONNECTION_ACCEPTED, isSessionAlreadyPresent);
-        return channel.writeAndFlush(ackMessage);
     }
 
     boolean isConnected() {
