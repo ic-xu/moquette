@@ -56,7 +56,7 @@ public class SessionRegistry {
     }
 
     public enum CreationModeEnum {
-        CREATED_CLEAN_NEW, REOPEN_EXISTING, DROP_EXISTING;
+        CREATED_CLEAN_NEW, REOPEN_EXISTING, DROP_EXISTING
     }
 
     public static class SessionCreationResult {
@@ -98,10 +98,10 @@ public class SessionRegistry {
             // publish the session
             final Session previous = pool.putIfAbsent(clientId, newSession);
             final boolean success = previous == null;
-
+            // new session
             if (success) {
                 LOG.trace("case 1, not existing session with CId {}", clientId);
-            } else {
+            } else {//old session
                 postConnectAction = reopenExistingSession(msg, clientId, newSession, username);
             }
         } else {

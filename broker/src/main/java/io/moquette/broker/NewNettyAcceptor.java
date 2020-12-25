@@ -178,8 +178,16 @@ class NewNettyAcceptor {
         } else {
             this.errorsCather = Optional.empty();
         }
+
+        /**
+         * init netty server
+         */
         initializePlainTCPTransport(mqttHandler, props);
         initializeWebSocketTransport(mqttHandler, props);
+
+        /**
+         * init SSL netty server
+         */
         if (securityPortsConfigured(props)) {
             SslContext sslContext = sslCtxCreator.initSSLContext();
             if (sslContext == null) {

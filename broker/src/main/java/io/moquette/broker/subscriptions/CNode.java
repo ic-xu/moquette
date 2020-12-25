@@ -15,24 +15,29 @@
  */
 package io.moquette.broker.subscriptions;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 class CNode {
 
     Token token;
-    private List<INode> children;
+    private Set<INode> children;
     Set<Subscription> subscriptions;
 
     CNode() {
-        this.children = new ArrayList<>();
-        this.subscriptions = new HashSet<>();
+        this.children = ConcurrentHashMap.newKeySet();
+        this.subscriptions = ConcurrentHashMap.newKeySet();
     }
 
     //Copy constructor
-    private CNode(Token token, List<INode> children, Set<Subscription> subscriptions) {
+    private CNode(Token token, Set<INode> children, Set<Subscription> subscriptions) {
         this.token = token; // keep reference, root comparison in directory logic relies on it for now.
-        this.subscriptions = new HashSet<>(subscriptions);
-        this.children = new ArrayList<>(children);
+        this.subscriptions = ConcurrentHashMap.newKeySet();
+        this.subscriptions.addAll(subscriptions);
+//        new HashSet<>(subscriptions);
+        this.children = ConcurrentHashMap.newKeySet();
+        this.children.addAll(children);
     }
 
     boolean anyChildrenMatch(Token token) {
@@ -46,7 +51,8 @@ class CNode {
     }
 
     List<INode> allChildren() {
-        return this.children;
+       return new ArrayList<>(this.children);
+//        return this.children;
     }
 
     INode childOf(Token token) {

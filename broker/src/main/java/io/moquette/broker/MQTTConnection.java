@@ -38,6 +38,9 @@ import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
 import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
 import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
+/**
+ *  message handle core
+ */
 final class MQTTConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(MQTTConnection.class);
@@ -124,6 +127,10 @@ final class MQTTConnection {
         bindedSession.pubAckReceived(messageID);
     }
 
+    /**
+     * 连接处理类
+     * @param msg
+     */
     void processConnect(MqttConnectMessage msg) {
         MqttConnectPayload payload = msg.payload();
         String clientId = payload.clientIdentifier();
@@ -180,39 +187,37 @@ final class MQTTConnection {
         final MqttConnAckMessage ackMessage = MqttMessageBuilders.connAck()
             .returnCode(CONNECTION_ACCEPTED)
             .sessionPresent(isSessionAlreadyPresent).build();
-        channel.writeAndFlush(ackMessage).addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isSuccess()) {
-                    LOG.trace("CONNACK sent, channel: {}", channel);
-                    if (!result.session.completeConnection()) {
-                        // send DISCONNECT and close the channel
-                        final MqttMessage disconnectMsg = MqttMessageBuilders.disconnect().build();
-                        channel.writeAndFlush(disconnectMsg).addListener(CLOSE);
-                        LOG.warn("CONNACK is sent but the session created can't transition in CONNECTED state");
-                    } else {
-                        NettyUtils.clientID(channel, clientIdUsed);
-                        connected = true;
-                        // OK continue with sending queued messages and normal flow
-
-                        if (result.mode == SessionRegistry.CreationModeEnum.REOPEN_EXISTING) {
-                            result.session.sendQueuedMessagesWhileOffline();
-                        }
-
-                        initializeKeepAliveTimeout(channel, msg, clientIdUsed);
-                        setupInflightResender(channel);
-
-                        postOffice.dispatchConnection(msg);
-                        LOG.trace("dispatch connection: {}", msg.toString());
+        channel.writeAndFlush(ackMessage).addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                LOG.trace("CONNACK sent, channel: {}", channel);
+                if (!result.session.completeConnection()) {//change the session status
+                    // send DISCONNECT and close the channel
+                    final MqttMessage disconnectMsg = MqttMessageBuilders.disconnect().build();
+                    channel.writeAndFlush(disconnectMsg).addListener(ChannelFutureListener.CLOSE);
+                    LOG.warn("CONNACK is sent but the session created can't transition in CONNECTED state");
+                } else {//clientIdUsed == clientId
+                    NettyUtils.clientID(channel, clientIdUsed);
+                    // 连接标记设置为true
+                    connected = true;
+                    // OK continue with sending queued messages and normal flow
+                    //notify other offline
+                    if (result.mode == SessionRegistry.CreationModeEnum.REOPEN_EXISTING) {
+                        result.session.sendQueuedMessagesWhileOffline();
                     }
-                } else {
-                    bindedSession.disconnect();
-                    sessionRegistry.remove(bindedSession);
-                    LOG.error("CONNACK send failed, cleanup session and close the connection", future.cause());
-                    channel.close();
-                }
 
+                    initializeKeepAliveTimeout(channel, msg, clientIdUsed);
+                    setupInflightResender(channel);
+
+                    postOffice.dispatchConnection(msg);
+                    LOG.trace("dispatch connection: {}", msg.toString());
+                }
+            } else {
+                bindedSession.disconnect();
+                sessionRegistry.remove(bindedSession);
+                LOG.error("CONNACK send failed, cleanup session and close the connection", future.cause());
+                channel.close();
             }
+
         });
     }
 

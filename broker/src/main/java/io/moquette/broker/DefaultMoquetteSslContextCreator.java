@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Moquette integration implementation to load SSL certificate from local filesystem path configured in
  * config file.
+ * ssl 上下文创建类
  */
 class DefaultMoquetteSslContextCreator implements ISslContextCreator {
 

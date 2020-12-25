@@ -15,9 +15,10 @@ echo "                   |_|                                                   "
 echo "                                                                         "
 echo "                                               version: 0..13-SNAPSHOT   "
 
-
+#切换到脚本所在的目录
 cd "$(dirname "$0")"
 
+# $0 Shell本身的文件名
 # resolve links - $0 may be a softlink
 PRG="$0"
 
@@ -33,6 +34,8 @@ done
 
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
+
+
 
 # Only set MOQUETTE_HOME if not already set
 [ -f "$MOQUETTE_HOME"/bin/moquette.sh ] || MOQUETTE_HOME=`cd "$PRGDIR/.." ; pwd`

@@ -61,6 +61,8 @@ public class FileResourceLoader implements IResourceLoader {
 
     @Override
     public Reader loadResource(String relativePath) {
+        if(parentPath==null)
+            return loadResource(new File(defaultFile.getParent(), relativePath));
         return loadResource(new File(parentPath, relativePath));
     }
 

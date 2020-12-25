@@ -75,6 +75,8 @@ public class Server {
 
     private static File defaultConfigFile() {
         String configPath = System.getProperty("moquette.path", null);
+        if (null == configPath)
+            configPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         return new File(configPath, IConfig.DEFAULT_CONFIG);
     }
 
@@ -96,8 +98,8 @@ public class Server {
      * <p>
      * Its suggested to at least have the following properties:
      * <ul>
-     *  <li>port</li>
-     *  <li>password_file</li>
+     * <li>port</li>
+     * <li>password_file</li>
      * </ul>
      *
      * @param configProps the properties map to use as configuration.
@@ -161,6 +163,11 @@ public class Server {
         final ISubscriptionsRepository subscriptionsRepository;
         final IQueueRepository queueRepository;
         final IRetainedRepository retainedRepository;
+
+
+        /**
+         * 持久化位置，如果没有配置就进else，走内存存储
+         */
         if (persistencePath != null && !persistencePath.isEmpty()) {
             LOG.trace("Configuring H2 subscriptions store to {}", persistencePath);
             h2Builder = new H2Builder(config, scheduler).initStore();
@@ -181,7 +188,7 @@ public class Server {
         dispatcher = new PostOffice(subscriptions, retainedRepository, sessions, interceptor, authorizator);
         final BrokerConfiguration brokerConfig = new BrokerConfiguration(config);
         MQTTConnectionFactory connectionFactory = new MQTTConnectionFactory(brokerConfig, authenticator, sessions,
-                                                                            dispatcher);
+            dispatcher);
 
         final NewNettyMQTTHandler mqttHandler = new NewNettyMQTTHandler(connectionFactory);
         acceptor = new NewNettyAcceptor();
@@ -229,6 +236,7 @@ public class Server {
         IResourceLoader resourceLoader = props.getResourceLoader();
         if (authenticator == null) {
             String passwdPath = props.getProperty(BrokerConstants.PASSWORD_FILE_PROPERTY_NAME, "");
+            
             if (passwdPath.isEmpty()) {
                 authenticator = new AcceptAllAuthenticator();
             } else {
@@ -239,6 +247,11 @@ public class Server {
         return authenticator;
     }
 
+    /**
+     * init InterceptHandlerListener
+     * @param props config
+     * @param embeddedObservers listener
+     */
     private void initInterceptors(IConfig props, List<? extends InterceptHandler> embeddedObservers) {
         LOG.info("Configuring message interceptors...");
 
@@ -246,7 +259,7 @@ public class Server {
         String interceptorClassName = props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
         if (interceptorClassName != null && !interceptorClassName.isEmpty()) {
             InterceptHandler handler = loadClass(interceptorClassName, InterceptHandler.class,
-                                                 io.moquette.broker.Server.class, this);
+                io.moquette.broker.Server.class, this);
             if (handler != null) {
                 observers.add(handler);
             }
@@ -261,7 +274,7 @@ public class Server {
             // check if constructor with constructor arg class parameter
             // exists
             LOG.info("Invoking constructor with {} argument. ClassName={}, interfaceName={}",
-                     constructorArgClass.getName(), className, intrface.getName());
+                constructorArgClass.getName(), className, intrface.getName());
             instance = this.getClass().getClassLoader()
                 .loadClass(className)
                 .asSubclass(intrface)
@@ -269,8 +282,8 @@ public class Server {
                 .newInstance(props);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             LOG.warn("Unable to invoke constructor with {} argument. ClassName={}, interfaceName={}, cause={}, " +
-                     "errorMessage={}", constructorArgClass.getName(), className, intrface.getName(), ex.getCause(),
-                     ex.getMessage());
+                    "errorMessage={}", constructorArgClass.getName(), className, intrface.getName(), ex.getCause(),
+                ex.getMessage());
             return null;
         } catch (NoSuchMethodException | InvocationTargetException e) {
             try {
@@ -283,7 +296,7 @@ public class Server {
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException |
                 NoSuchMethodException | InvocationTargetException ex) {
                 LOG.error("Unable to invoke default constructor. ClassName={}, interfaceName={}, cause={}, " +
-                          "errorMessage={}", className, intrface.getName(), ex.getCause(), ex.getMessage());
+                    "errorMessage={}", className, intrface.getName(), ex.getCause(), ex.getMessage());
                 return null;
             }
         }
@@ -303,7 +316,7 @@ public class Server {
         final int messageID = msg.variableHeader().packetId();
         if (!initialized) {
             LOG.error("Moquette is not started, internal message cannot be published. CId: {}, messageId: {}", clientId,
-                      messageID);
+                messageID);
             throw new IllegalStateException("Can't publish on a integration is not yet started");
         }
         LOG.trace("Internal publishing message CId: {}, messageId: {}", clientId, messageID);
@@ -382,7 +395,7 @@ public class Server {
 
     /**
      * Return a list of descriptors of connected clients.
-     * */
+     */
     public Collection<ClientDescriptor> listConnectedClients() {
         return sessions.listConnectedClients();
     }

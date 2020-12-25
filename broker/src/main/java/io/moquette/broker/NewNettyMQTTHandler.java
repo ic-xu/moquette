@@ -28,6 +28,9 @@ import java.io.IOException;
 
 import static io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE;
 
+/**
+ * netty Acceptor Message Handler
+ */
 @Sharable
 public class NewNettyMQTTHandler extends ChannelInboundHandlerAdapter {
 
@@ -53,6 +56,7 @@ public class NewNettyMQTTHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
         MqttMessage msg = NettyUtils.validateMessage(message);
+        //从channel 中获取相应的连接对象，通过连接对象处理相应的事务
         final MQTTConnection mqttConnection = mqttConnection(ctx.channel());
         try {
             mqttConnection.handleMessage(msg);
@@ -78,7 +82,9 @@ public class NewNettyMQTTHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
+        // 每次连接上来 使用连接工厂创建一个连接管理器
         MQTTConnection connection = connectionFactory.create(ctx.channel());
+        //把相应的连接对象封装在channel中，以供后续使用
         mqttConnection(ctx.channel(), connection);
     }
 

@@ -2,6 +2,9 @@ package io.moquette.broker;
 
 import java.util.Objects;
 
+/**
+ * 客户端连接信息
+ */
 public class ClientDescriptor {
 
     private final String clientID;

@@ -53,6 +53,11 @@ public class Topic implements Serializable {
         this.topic = topic;
     }
 
+
+    public String getValue(){
+        return topic;
+    }
+
     Topic(List<Token> tokens) {
         this.tokens = tokens;
         List<String> strTokens = tokens.stream().map(Token::toString).collect(Collectors.toList());

@@ -16,9 +16,12 @@
 
 package io.moquette.broker.subscriptions;
 
+import io.moquette.utils.HashUtils;
 import io.netty.handler.codec.mqtt.MqttQoS;
 
 import java.io.Serializable;
+import java.util.Objects;
+
 
 /**
  * Maintain the information about which Topic a certain ClientID is subscribed and at which QoS
@@ -58,25 +61,51 @@ public final class Subscription implements Serializable {
         return requestedQos.value() < sub.requestedQos.value();
     }
 
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o)
+//            return true;
+//        if (o == null || getClass() != o.getClass())
+//            return false;
+//
+//        Subscription that = (Subscription) o;
+//
+//        if (clientId != null ? !clientId.equals(that.clientId) : that.clientId != null)
+//            return false;
+//        return !(topicFilter != null ? !topicFilter.equals(that.topicFilter) : that.topicFilter != null);
+//    }
+
+
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-
+//        if (this == o)
+//            return true;
+//        if (o == null || getClass() != o.getClass())
+//            return false;
         Subscription that = (Subscription) o;
-
-        if (clientId != null ? !clientId.equals(that.clientId) : that.clientId != null)
+        try {
+            return this.clientId.equals(that.clientId) && this.topicFilter.equals(that.topicFilter)
+                && this.requestedQos.value() == that.requestedQos.value();
+        } catch (Exception ignore) {
             return false;
-        return !(topicFilter != null ? !topicFilter.equals(that.topicFilter) : that.topicFilter != null);
+        }
     }
+
+//    @Override
+//    public int hashCode() {
+//        int result = clientId != null ? clientId.hashCode() : 0;
+//        result = 31 * result + (topicFilter != null ? topicFilter.hashCode() : 0);
+//        return result;
+//    }
 
     @Override
     public int hashCode() {
-        int result = clientId != null ? clientId.hashCode() : 0;
-        result = 31 * result + (topicFilter != null ? topicFilter.hashCode() : 0);
-        return result;
+        int result1 = clientId != null ? clientId.hashCode() : Integer.MAX_VALUE;
+        int result2 = topicFilter != null ? topicFilter.hashCode() : Integer.MAX_VALUE;
+        int result3 = requestedQos != null ? requestedQos.hashCode() : Integer.MAX_VALUE;
+        return result1 & result2 & result3;
+//        result = 31 * result + (topicFilter != null ? topicFilter.hashCode() : 0);
+//        return result;
     }
 
     @Override

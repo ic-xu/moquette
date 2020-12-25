@@ -91,7 +91,9 @@ class Session {
     private Queue<SessionRegistry.EnqueuedMessage> sessionQueue;
     private final AtomicReference<SessionStatus> status = new AtomicReference<>(SessionStatus.DISCONNECTED);
     private MQTTConnection mqttConnection;
-    private List<Subscription> subscriptions = new ArrayList<>();
+
+    //subscriptions 保存该用户订阅的主题信息，
+    private Set<Subscription> subscriptions = new HashSet<>();
     private final Map<Integer, SessionRegistry.EnqueuedMessage> inflightWindow = new HashMap<>();
     private final DelayQueue<InFlightPacket> inflightTimeouts = new DelayQueue<>();
     private final Map<Integer, MqttPublishMessage> qos2Receiving = new HashMap<>();
@@ -145,6 +147,18 @@ class Session {
         subscriptions.addAll(newSubscriptions);
     }
 
+    //这里应该要设置前缀匹配原则
+    public void unSubscriptions(List<String> topic, String clientId) {
+
+        ArrayList<Subscription> remove = new ArrayList<>();
+        for (Subscription subscription : subscriptions) {
+            if (topic.contains(subscription.getTopicFilter().getValue())) {
+                remove.add(subscription);
+            }
+        }
+        subscriptions.removeAll(remove);
+    }
+
     public boolean hasWill() {
         return will != null;
     }
@@ -179,6 +193,9 @@ class Session {
         return clean;
     }
 
+    /**
+     * @param packetId id
+     */
     public void processPubRec(int packetId) {
         inflightWindow.remove(packetId);
         inflightSlots.incrementAndGet();
@@ -203,7 +220,7 @@ class Session {
         drainQueueToConnection();
 
         // TODO notify the interceptor
-//                final InterceptAcknowledgedMessage interceptAckMsg = new InterceptAcknowledgedMessage(inflightMsg,
+//             final InterceptAcknowledgedMessage interceptAckMsg = new InterceptAcknowledgedMessage(inflightMsg,
 // topic, username, messageID);
 //                m_interceptor.notifyMessageAcknowledged(interceptAckMsg);
     }
@@ -238,7 +255,7 @@ class Session {
             inflightWindow.put(packetId, new SessionRegistry.PublishedMessage(topic, qos, payload));
             inflightTimeouts.add(new InFlightPacket(packetId, FLIGHT_BEFORE_RESEND_MS));
             MqttPublishMessage publishMsg = MQTTConnection.notRetainedPublishWithMessageId(topic.toString(), qos,
-                                                                                           payload, packetId);
+                payload, packetId);
             mqttConnection.sendPublish(publishMsg);
 
             // TODO drainQueueToConnection();?
@@ -255,7 +272,7 @@ class Session {
             inflightWindow.put(packetId, new SessionRegistry.PublishedMessage(topic, qos, payload));
             inflightTimeouts.add(new InFlightPacket(packetId, FLIGHT_BEFORE_RESEND_MS));
             MqttPublishMessage publishMsg = MQTTConnection.notRetainedPublishWithMessageId(topic.toString(), qos,
-                                                                                           payload, packetId);
+                payload, packetId);
             mqttConnection.sendPublish(publishMsg);
 
             drainQueueToConnection();

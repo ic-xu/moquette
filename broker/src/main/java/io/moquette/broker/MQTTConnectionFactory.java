@@ -18,6 +18,11 @@ package io.moquette.broker;
 import io.moquette.broker.security.IAuthenticator;
 import io.netty.channel.Channel;
 
+/**
+ * Connection factory
+ *
+ * create connection for client
+ */
 class MQTTConnectionFactory {
 
     private final BrokerConfiguration brokerConfig;

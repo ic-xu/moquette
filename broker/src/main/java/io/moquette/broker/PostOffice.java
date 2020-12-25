@@ -67,6 +67,8 @@ class PostOffice {
         // verify which topics of the subscribe ongoing has read access permission
         int messageID = messageId(msg);
         List<MqttTopicSubscription> ackTopics = authorizator.verifyTopicsReadAccess(clientID, username, msg);
+
+        //create mqttSubAckMessageBody
         MqttSubAckMessage ackMessage = doAckMessageFromValidateFilters(ackTopics, messageID);
 
         // store topics subscriptions in session
@@ -88,6 +90,7 @@ class PostOffice {
         // send ack message
         mqttConnection.sendSubAckMessage(messageID, ackMessage);
 
+        //发布保留的订阅消息
         publishRetainedMessagesForSubscriptions(clientID, newSubscriptions);
 
         for (Subscription subscription : newSubscriptions) {
@@ -95,6 +98,7 @@ class PostOffice {
         }
     }
 
+    //发布保留的订阅消息
     private void publishRetainedMessagesForSubscriptions(String clientID, List<Subscription> newSubscriptions) {
         Session targetSession = this.sessionRegistry.retrieve(clientID);
         for (Subscription subscription : newSubscriptions) {
@@ -148,6 +152,11 @@ class PostOffice {
 
             // TODO remove the subscriptions to Session
 //            clientSession.unsubscribeFrom(topic);
+            // add the subscriptions to Session
+            Session session = sessionRegistry.retrieve(clientID);
+            session.unSubscriptions(topics,clientID);
+
+
 
             String username = NettyUtils.userName(mqttConnection.channel);
             interceptor.notifyTopicUnsubscribed(topic.toString(), clientID, username);

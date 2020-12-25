@@ -17,18 +17,19 @@ package io.moquette.persistence;
 
 import io.moquette.broker.ISubscriptionsRepository;
 import io.moquette.broker.subscriptions.Subscription;
+import io.netty.util.internal.ConcurrentSet;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class MemorySubscriptionsRepository implements ISubscriptionsRepository {
 
-    private final List<Subscription> subscriptions = new ArrayList<>();
+    private Set<Subscription> subscriptions = new CopyOnWriteArraySet<>();
 
     @Override
     public List<Subscription> listAllSubscriptions() {
-        return Collections.unmodifiableList(subscriptions);
+        return Collections.unmodifiableList(new ArrayList<>(subscriptions));
     }
 
     @Override

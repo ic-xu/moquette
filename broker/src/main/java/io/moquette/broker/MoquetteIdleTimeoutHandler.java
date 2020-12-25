@@ -26,6 +26,9 @@ import io.netty.handler.timeout.IdleStateEvent;
 
 import static io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE;
 
+/**
+ * timeoutHandler
+ */
 @Sharable
 public class MoquetteIdleTimeoutHandler extends ChannelDuplexHandler {
 

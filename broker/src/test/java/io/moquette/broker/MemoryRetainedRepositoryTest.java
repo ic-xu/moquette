@@ -16,24 +16,44 @@
 
 package io.moquette.broker;
 
+import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.broker.subscriptions.Topic;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.*;
 
 public class MemoryRetainedRepositoryTest {
+
+
+    @Test
+    public void testHashSet() {
+        Set<Subscription> set = ConcurrentHashMap.newKeySet();
+
+        for (int i = 0; i < 10; i++) {
+            Subscription test01 = new Subscription("1111", Topic.asTopic("test01"), MqttQoS.AT_MOST_ONCE);
+            int h = test01.hashCode();
+            int result = (h ^ (h >>> 16)) & 0x7fffffff;
+            System.err.println(result);
+            set.add(test01);
+        }
+        System.err.println(set);
+    }
+
 
     @Test
     public void testRetainedOnTopicReturnsExactTopicMatch() {
         MemoryRetainedRepository repository = new MemoryRetainedRepository();
         Topic retainedTopic = new Topic("foo/bar/baz");
         Topic otherRetainedTopic = new Topic("foo/bar/bazzz");
-        
+
         repository.retain(retainedTopic, MqttMessageBuilders
             .publish()
             .qos(MqttQoS.AT_LEAST_ONCE)
@@ -50,7 +70,7 @@ public class MemoryRetainedRepositoryTest {
             .build());
 
         List<RetainedMessage> retainedMessages = repository.retainedOnTopic("foo/bar/baz");
-        
+
         assertEquals(1, retainedMessages.size());
         assertEquals("foo/bar/baz", retainedMessages.get(0).getTopic().toString());
     }
