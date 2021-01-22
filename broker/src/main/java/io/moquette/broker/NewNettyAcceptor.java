@@ -137,7 +137,14 @@ class NewNettyAcceptor {
 
     private Class<? extends ServerSocketChannel> channelClass;
 
-    public void initialize(NewNettyMQTTHandler mqttHandler, IConfig props, ISslContextCreator sslCtxCreator) {
+    /**
+     *
+     * @param mqttHandler
+     * @param props
+     * @param sslCtxCreator
+     * @param postOffice 后面新增的参数，用于发送 Metrics 主题消息
+     */
+    public void initialize(NewNettyMQTTHandler mqttHandler, IConfig props, ISslContextCreator sslCtxCreator,PostOffice postOffice) {
         LOG.debug("Initializing Netty acceptor");
 
         nettySoBacklog = props.intProp(BrokerConstants.NETTY_SO_BACKLOG_PROPERTY_NAME, 128);
@@ -163,7 +170,7 @@ class NewNettyAcceptor {
 
         final boolean useFineMetrics = props.boolProp(METRICS_ENABLE_PROPERTY_NAME, false);
         if (useFineMetrics) {
-            DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler();
+            DropWizardMetricsHandler metricsHandler = new DropWizardMetricsHandler(postOffice);
             metricsHandler.init(props);
             this.metrics = Optional.of(metricsHandler);
         } else {
@@ -172,9 +179,11 @@ class NewNettyAcceptor {
 
         final boolean useBugSnag = props.boolProp(BUGSNAG_ENABLE_PROPERTY_NAME, false);
         if (useBugSnag) {
-            BugSnagErrorsHandler bugSnagHandler = new BugSnagErrorsHandler();
-            bugSnagHandler.init(props);
-            this.errorsCather = Optional.of(bugSnagHandler);
+//            BugSnagErrorsHandler bugSnagHandler = new BugSnagErrorsHandler();
+//            bugSnagHandler.init(props);
+//            this.errorsCather = Optional.of(bugSnagHandler);
+
+            this.errorsCather = Optional.empty();
         } else {
             this.errorsCather = Optional.empty();
         }
@@ -223,11 +232,15 @@ class NewNettyAcceptor {
         try {
             LOG.debug("Binding integration. host={}, port={}", host, port);
             // Bind and start to accept incoming connections.
-            ChannelFuture f = b.bind(host, port);
-            LOG.info("Server bound to host={}, port={}, protocol={}", host, port, protocol);
-            f.sync()
-                .addListener(new LocalPortReaderFutureListener(protocol))
-                .addListener(FIRE_EXCEPTION_ON_FAILURE);
+
+//            for (int i = 1883; i <1899 ; i++) {
+                ChannelFuture f = b.bind(host, port);
+                LOG.info("Server bound to host={}, port={}, protocol={}", host, port, protocol);
+                f.sync()
+                    .addListener(new LocalPortReaderFutureListener(protocol))
+                    .addListener(FIRE_EXCEPTION_ON_FAILURE);
+//            }
+
         } catch (Exception ex) {
             if (ex instanceof BindException) {
                LOG.error("Cannot bind to port: " + port, ex);

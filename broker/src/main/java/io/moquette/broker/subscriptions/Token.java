@@ -24,6 +24,7 @@ public class Token {
     static final Token EMPTY = new Token("");
     static final Token MULTI = new Token("#");
     static final Token SINGLE = new Token("+");
+    static final Token ALL = new Token("*");
     final String name;
 
     protected Token(String s) {

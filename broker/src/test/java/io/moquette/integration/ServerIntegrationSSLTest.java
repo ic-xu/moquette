@@ -124,7 +124,7 @@ public class ServerIntegrationSSLTest {
         File dbFile = new File(dbPath);
         assertFalse(String.format("The DB storagefile %s already exists", dbPath), dbFile.exists());
 
-        startServer();
+//        startServer();
 
         MqttClientPersistence dataStore = new MqttDefaultFilePersistence(tempFolder.newFolder("client").getAbsolutePath());
         m_client = new MqttClient("ssl://localhost:8883", "TestClient", dataStore);

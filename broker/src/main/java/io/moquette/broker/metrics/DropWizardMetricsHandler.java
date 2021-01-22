@@ -15,10 +15,8 @@
  */
 package io.moquette.broker.metrics;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-import com.librato.metrics.reporter.Librato;
+import com.codahale.metrics.*;
+import io.moquette.broker.PostOffice;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.NettyUtils;
 import io.netty.channel.ChannelHandlerContext;
@@ -40,24 +38,37 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
     private Meter publishesMetrics;
     private Meter subscribeMetrics;
     private Counter connectedClientsMetrics;
+    private PostOffice postOffice;
+
+
+    public DropWizardMetricsHandler(PostOffice postOffice) {
+        this.postOffice = postOffice;
+    }
 
     public void init(IConfig props) {
         this.metrics = new MetricRegistry();
         this.publishesMetrics = metrics.meter("publish.requests");
         this.subscribeMetrics = metrics.meter("subscribe.requests");
         this.connectedClientsMetrics = metrics.counter("connect.num_clients");
+
 //        ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
 //            .convertRatesTo(TimeUnit.SECONDS)
 //            .convertDurationsTo(TimeUnit.MILLISECONDS)
 //            .build();
 //        reporter.start(1, TimeUnit.MINUTES);
-        final String email = props.getProperty(METRICS_LIBRATO_EMAIL_PROPERTY_NAME);
-        final String token = props.getProperty(METRICS_LIBRATO_TOKEN_PROPERTY_NAME);
+//
+//        final String email = props.getProperty(METRICS_LIBRATO_EMAIL_PROPERTY_NAME);
+//        final String token = props.getProperty(METRICS_LIBRATO_TOKEN_PROPERTY_NAME);
         final String source = props.getProperty(METRICS_LIBRATO_SOURCE_PROPERTY_NAME);
 
-        Librato.reporter(this.metrics, email, token)
-            .setSource(source)
-            .start(10, TimeUnit.SECONDS);
+        MetricsPubMessageReport metricsPubMessageReport = MetricsPubMessageReport
+            .forRegistry(metrics)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .convertDurationsTo(TimeUnit.MILLISECONDS)
+            .build(postOffice);
+
+        metricsPubMessageReport.start(1, TimeUnit.MINUTES);
+
     }
 
     @Override
@@ -75,7 +86,7 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
                 this.connectedClientsMetrics.inc();
                 break;
             case DISCONNECT:
-                this.connectedClientsMetrics.dec();
+//                this.connectedClientsMetrics.dec();
                 break;
             default:
                 break;
@@ -84,7 +95,7 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         String clientID = NettyUtils.clientID(ctx.channel());
         if (clientID != null && !clientID.isEmpty()) {
             this.connectedClientsMetrics.dec();

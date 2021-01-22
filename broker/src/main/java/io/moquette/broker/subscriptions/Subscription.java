@@ -16,11 +16,9 @@
 
 package io.moquette.broker.subscriptions;
 
-import io.moquette.utils.HashUtils;
 import io.netty.handler.codec.mqtt.MqttQoS;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 
 /**
@@ -84,8 +82,8 @@ public final class Subscription implements Serializable {
 //            return false;
         Subscription that = (Subscription) o;
         try {
-            return this.clientId.equals(that.clientId) && this.topicFilter.equals(that.topicFilter)
-                && this.requestedQos.value() == that.requestedQos.value();
+            return this.clientId.equals(that.clientId) && this.topicFilter.equals(that.topicFilter);
+//                && this.requestedQos.value() == that.requestedQos.value();
         } catch (Exception ignore) {
             return false;
         }
@@ -102,8 +100,9 @@ public final class Subscription implements Serializable {
     public int hashCode() {
         int result1 = clientId != null ? clientId.hashCode() : Integer.MAX_VALUE;
         int result2 = topicFilter != null ? topicFilter.hashCode() : Integer.MAX_VALUE;
-        int result3 = requestedQos != null ? requestedQos.hashCode() : Integer.MAX_VALUE;
-        return result1 & result2 & result3;
+//        int result3 = requestedQos != null ? requestedQos.hashCode() : Integer.MAX_VALUE;
+        return result1 & result2;
+//        return result1 & result2 & result3;
 //        result = 31 * result + (topicFilter != null ? topicFilter.hashCode() : 0);
 //        return result;
     }

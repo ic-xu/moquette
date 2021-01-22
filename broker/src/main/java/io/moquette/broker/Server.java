@@ -17,6 +17,7 @@ package io.moquette.broker;
 
 import io.moquette.BrokerConstants;
 import io.moquette.broker.config.*;
+import io.moquette.broker.subscriptions.TopicMapSubscriptionDirectory;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.persistence.H2Builder;
 import io.moquette.persistence.MemorySubscriptionsRepository;
@@ -55,7 +56,7 @@ public class Server {
     public static void main(String[] args) throws IOException {
         final Server server = new Server();
         server.startServer();
-        System.out.println("Server started, version 0.13-SNAPSHOT");
+        System.out.println("Server started, version 0.14-SNAPSHOT");
         //Bind a shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(server::stopServer));
     }
@@ -69,14 +70,18 @@ public class Server {
         File defaultConfigurationFile = defaultConfigFile();
         LOG.info("Starting Moquette integration. Configuration file path={}", defaultConfigurationFile.getAbsolutePath());
         IResourceLoader filesystemLoader = new FileResourceLoader(defaultConfigurationFile);
+
+        String absolutePath = defaultConfigurationFile.getPath();
+        filesystemLoader = new ClasspathResourceLoader(absolutePath);
+
         final IConfig config = new ResourceLoaderConfig(filesystemLoader);
         startServer(config);
     }
 
     private static File defaultConfigFile() {
         String configPath = System.getProperty("moquette.path", null);
-        if (null == configPath)
-            configPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+//        if (null == configPath)
+//            configPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         return new File(configPath, IConfig.DEFAULT_CONFIG);
     }
 
@@ -164,7 +169,6 @@ public class Server {
         final IQueueRepository queueRepository;
         final IRetainedRepository retainedRepository;
 
-
         /**
          * 持久化位置，如果没有配置就进else，走内存存储
          */
@@ -181,18 +185,26 @@ public class Server {
             retainedRepository = new MemoryRetainedRepository();
         }
 
-        ISubscriptionsDirectory subscriptions = new CTrieSubscriptionDirectory();
+        //这里切换存储方式
+//        ISubscriptionsDirectory subscriptions = new CTrieSubscriptionDirectory();
+
+        ISubscriptionsDirectory subscriptions = new TopicMapSubscriptionDirectory();
         subscriptions.init(subscriptionsRepository);
         final Authorizator authorizator = new Authorizator(authorizatorPolicy);
         sessions = new SessionRegistry(subscriptions, queueRepository, authorizator);
         dispatcher = new PostOffice(subscriptions, retainedRepository, sessions, interceptor, authorizator);
+
+        String registerUser = config.getProperty(BrokerConstants.REGISTER_CENTER_USER, null);
+        if (null != registerUser)
+            dispatcher.addRegisterUserName(registerUser.split(","));
+
         final BrokerConfiguration brokerConfig = new BrokerConfiguration(config);
         MQTTConnectionFactory connectionFactory = new MQTTConnectionFactory(brokerConfig, authenticator, sessions,
             dispatcher);
 
         final NewNettyMQTTHandler mqttHandler = new NewNettyMQTTHandler(connectionFactory);
         acceptor = new NewNettyAcceptor();
-        acceptor.initialize(mqttHandler, config, sslCtxCreator);
+        acceptor.initialize(mqttHandler, config, sslCtxCreator, dispatcher);
 
         final long startTime = System.currentTimeMillis() - start;
         LOG.info("Moquette integration has been started successfully in {} ms", startTime);
@@ -236,7 +248,7 @@ public class Server {
         IResourceLoader resourceLoader = props.getResourceLoader();
         if (authenticator == null) {
             String passwdPath = props.getProperty(BrokerConstants.PASSWORD_FILE_PROPERTY_NAME, "");
-            
+
             if (passwdPath.isEmpty()) {
                 authenticator = new AcceptAllAuthenticator();
             } else {
@@ -249,7 +261,8 @@ public class Server {
 
     /**
      * init InterceptHandlerListener
-     * @param props config
+     *
+     * @param props             config
      * @param embeddedObservers listener
      */
     private void initInterceptors(IConfig props, List<? extends InterceptHandler> embeddedObservers) {

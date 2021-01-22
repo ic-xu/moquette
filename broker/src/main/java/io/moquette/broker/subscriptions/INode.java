@@ -42,4 +42,23 @@ class INode {
     boolean isTombed() {
         return this.mainNode() instanceof TNode;
     }
+
+//
+//    @Override
+//    public int hashCode() {
+//        return mainNode.get().hashCode();
+//    }
+//
+//    @Override
+//    public boolean equals(Object obj) {
+//        try{
+//            INode iNode = (INode)obj;
+//            if(iNode.mainNode().token.equals(this.mainNode().token)){
+//                return true;
+//            }else return false;
+//
+//        }catch (Exception e){
+//            return false;
+//        }
+//    }
 }

@@ -203,7 +203,7 @@ public class CTrieSubscriptionDirectoryMatchingTest {
         sut.add(specificSub);
 
         //Exercise
-        final Set<Subscription> matchingForSpecific = sut.matchQosSharpening(asTopic("a/b"));
+        final Set<Subscription> matchingForSpecific = sut.matchQosSharpening(asTopic("a/b"),false);
 
         // Verify
         assertThat(matchingForSpecific.size()).isEqualTo(1);
@@ -252,7 +252,7 @@ public class CTrieSubscriptionDirectoryMatchingTest {
         this.sut.add(client1SubQoS2);
 
         // Verify
-        Set<Subscription> subscriptions = this.sut.matchQosSharpening(asTopic("client/test/b"));
+        Set<Subscription> subscriptions = this.sut.matchQosSharpening(asTopic("client/test/b"),false);
         assertThat(subscriptions).contains(client1SubQoS2);
         assertThat(subscriptions).contains(client2Sub);
 

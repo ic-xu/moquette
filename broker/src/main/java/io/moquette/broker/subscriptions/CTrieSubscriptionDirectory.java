@@ -21,17 +21,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@SuppressWarnings("ALL")
 public class CTrieSubscriptionDirectory implements ISubscriptionsDirectory {
 
     private static final Logger LOG = LoggerFactory.getLogger(CTrieSubscriptionDirectory.class);
 
     private CTrie ctrie;
+
     private volatile ISubscriptionsRepository subscriptionsRepository;
 
     @Override
     public void init(ISubscriptionsRepository subscriptionsRepository) {
         LOG.info("Initializing CTrie");
-        ctrie = new CTrie();
+//        ctrie = new CTrie();
 
         LOG.info("Initializing subscriptions store...");
         this.subscriptionsRepository = subscriptionsRepository;
@@ -43,6 +45,7 @@ public class CTrieSubscriptionDirectory implements ISubscriptionsDirectory {
         for (Subscription subscription : this.subscriptionsRepository.listAllSubscriptions()) {
             LOG.debug("Re-subscribing {}", subscription);
             ctrie.addToTree(subscription);
+
         }
         if (LOG.isTraceEnabled()) {
             LOG.trace("Stored subscriptions have been reloaded. SubscriptionTree = {}", dumpTree());
@@ -58,17 +61,48 @@ public class CTrieSubscriptionDirectory implements ISubscriptionsDirectory {
      * contain character # and + because they are reserved to listeners subscriptions, and not topic
      * publishing.
      *
-     * @param topic
-     *            to use fo searching matching subscriptions.
+     * @param topic to use fo searching matching subscriptions.
      * @return the list of matching subscriptions, or empty if not matching.
      */
     @Override
     public Set<Subscription> matchWithoutQosSharpening(Topic topic) {
-        return ctrie.recursiveMatch(topic);
+        String in_topics = topic.getValue().replace("in topics", "").trim().replace("'", "").replace("\"", "").replaceAll(" +"," ");;
+        String[] topicArr = in_topics.split("&&");
+        if(topicArr.length==1){
+            return ctrie.recursiveMatch(topic);
+        }
+        ArrayList<Set<String>> subscriptions = new ArrayList<>(topicArr.length);
+        Map<String, Subscription> resultMap = new HashMap<>();
+        for (int i = 0; i < topicArr.length; i++) {
+            Topic topic1 = new Topic(topicArr[i].trim());
+            if (topic1.isValid()) {
+                HashSet<String> clientId = new HashSet<>();
+                for (Subscription sub : ctrie.recursiveMatch(topic1)) {
+                    clientId.add(sub.clientId);
+                    if (i == 0) {
+                        resultMap.put(sub.clientId, sub);
+                    }
+                }
+                subscriptions.add(clientId);
+            }
+        }
+        Set<String> resultSet = subscriptions.get(0);
+        if (subscriptions.size() > 1) {
+            for (int i = 1; i < subscriptions.size(); i++) {
+                resultSet.retainAll(subscriptions.get(i));
+            }
+        }
+        Set<Subscription> result = new HashSet<>();
+        for (String clientId:resultSet) {
+            result.add(resultMap.get(clientId));
+        }
+        return result;
+//        return ctrie.recursiveMatch(topic);
     }
 
+
     @Override
-    public Set<Subscription> matchQosSharpening(Topic topic) {
+    public Set<Subscription> matchQosSharpening(Topic topic,boolean isNeedBroadcasting) {
         final Set<Subscription> subscriptions = matchWithoutQosSharpening(topic);
 
         Map<String, Subscription> subsGroupedByClient = new HashMap<>();
@@ -92,7 +126,7 @@ public class CTrieSubscriptionDirectory implements ISubscriptionsDirectory {
      * Removes subscription from CTrie, adds TNode when the last client unsubscribes, then calls for cleanTomb in a
      * separate atomic CAS operation.
      *
-     * @param topic the subscription's topic to remove.
+     * @param topic    the subscription's topic to remove.
      * @param clientID the Id of client owning the subscription.
      */
     @Override

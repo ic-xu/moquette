@@ -1,23 +1,9 @@
-/*
- * Copyright (c) 2012-2018 The original author or authors
- * ------------------------------------------------------
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Apache License v2.0 which accompanies this distribution.
- *
- * The Eclipse Public License is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * The Apache License v2.0 is available at
- * http://www.opensource.org/licenses/apache2.0.php
- *
- * You may elect to redistribute this code under either of these licenses.
- */
 package io.moquette.broker;
 
 import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.broker.subscriptions.Topic;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
@@ -25,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -94,10 +81,24 @@ class Session {
 
     //subscriptions 保存该用户订阅的主题信息，
     private Set<Subscription> subscriptions = new HashSet<>();
-    private final Map<Integer, SessionRegistry.EnqueuedMessage> inflightWindow = new HashMap<>();
+    private final Map<Integer, SessionRegistry.EnqueuedMessage> inflightWindow = new ConcurrentHashMap<>();
     private final DelayQueue<InFlightPacket> inflightTimeouts = new DelayQueue<>();
-    private final Map<Integer, MqttPublishMessage> qos2Receiving = new HashMap<>();
+    private final Map<Integer, MqttPublishMessage> qos2Receiving = new ConcurrentHashMap<>();
     private final AtomicInteger inflightSlots = new AtomicInteger(INFLIGHT_WINDOW_SIZE); // this should be configurable
+
+    public synchronized void addInflightWindow(Map<Integer, SessionRegistry.EnqueuedMessage> inflightWindows) {
+        for (Integer packetId : inflightWindows.keySet()) {
+            inflightTimeouts.add(new InFlightPacket(packetId, FLIGHT_BEFORE_RESEND_MS));
+            inflightSlots.decrementAndGet();
+        }
+        inflightWindow.putAll(inflightWindows);
+    }
+
+
+    public Map<Integer, SessionRegistry.EnqueuedMessage> getInflightWindow() {
+        return inflightWindow;
+    }
+
 
     Session(String clientId, boolean clean, Will will, Queue<SessionRegistry.EnqueuedMessage> sessionQueue) {
         this(clientId, clean, sessionQueue);
@@ -269,7 +270,8 @@ class Session {
         if (canSkipQueue()) {
             inflightSlots.decrementAndGet();
             int packetId = mqttConnection.nextPacketId();
-            inflightWindow.put(packetId, new SessionRegistry.PublishedMessage(topic, qos, payload));
+            ByteBuf byteBuf = Unpooled.copiedBuffer(payload);
+            inflightWindow.put(packetId, new SessionRegistry.PublishedMessage(topic, qos, byteBuf));
             inflightTimeouts.add(new InFlightPacket(packetId, FLIGHT_BEFORE_RESEND_MS));
             MqttPublishMessage publishMsg = MQTTConnection.notRetainedPublishWithMessageId(topic.toString(), qos,
                 payload, packetId);
@@ -307,21 +309,31 @@ class Session {
     }
 
     public void resendInflightNotAcked() {
-        Collection<InFlightPacket> expired = new ArrayList<>(INFLIGHT_WINDOW_SIZE);
-        inflightTimeouts.drainTo(expired);
-
-        debugLogPacketIds(expired);
-
-        for (InFlightPacket notAckPacketId : expired) {
-            if (inflightWindow.containsKey(notAckPacketId.packetId)) {
-                final SessionRegistry.PublishedMessage msg =
-                    (SessionRegistry.PublishedMessage) inflightWindow.get(notAckPacketId.packetId);
-                final Topic topic = msg.topic;
-                final MqttQoS qos = msg.publishingQos;
-                final ByteBuf payload = msg.payload;
-                final ByteBuf copiedPayload = payload.retainedDuplicate();
-                MqttPublishMessage publishMsg = publishNotRetainedDuplicated(notAckPacketId, topic, qos, copiedPayload);
-                mqttConnection.sendPublish(publishMsg);
+        if (inflightTimeouts.size() == 0) {
+            for (Integer msgId : inflightWindow.keySet()) {
+                SessionRegistry.EnqueuedMessage enqueuedMessage = inflightWindow.get(msgId);
+                if (enqueuedMessage instanceof SessionRegistry.PublishedMessage) {
+                    SessionRegistry.EnqueuedMessage remove = inflightWindow.remove(msgId);
+                    SessionRegistry.PublishedMessage message = (SessionRegistry.PublishedMessage) remove;
+                    sendPublishOnSessionAtQos(message.topic, message.publishingQos, message.payload);
+                }
+            }
+        } else {
+            Collection<InFlightPacket> expired = new ArrayList<>(INFLIGHT_WINDOW_SIZE);
+            inflightTimeouts.drainTo(expired);
+            debugLogPacketIds(expired);
+            for (InFlightPacket notAckPacketId : expired) {
+                if (inflightWindow.containsKey(notAckPacketId.packetId)) {
+                    final SessionRegistry.PublishedMessage msg =
+                        (SessionRegistry.PublishedMessage) inflightWindow.get(notAckPacketId.packetId);
+                    final Topic topic = msg.topic;
+                    final MqttQoS qos = msg.publishingQos;
+                    final ByteBuf payload = msg.payload;
+                    final ByteBuf copiedPayload = payload.retainedDuplicate();
+//                ByteBuf byteBuf = Unpooled.copiedBuffer(payload);
+                    MqttPublishMessage publishMsg = publishNotRetainedDuplicated(notAckPacketId, topic, qos, copiedPayload);
+                    mqttConnection.sendPublish(publishMsg);
+                }
             }
         }
     }

@@ -116,7 +116,7 @@ public class PostOfficeUnsubscribeTest {
         final String clientId = connection.getClientId();
         Subscription expectedSubscription = new Subscription(clientId, new Topic(topic), desiredQos);
 
-        final Set<Subscription> matchedSubscriptions = subscriptions.matchQosSharpening(new Topic(topic));
+        final Set<Subscription> matchedSubscriptions = subscriptions.matchQosSharpening(new Topic(topic),false);
         assertEquals(1, matchedSubscriptions.size());
         //assertTrue(matchedSubscriptions.size() >=1);
         final Subscription onlyMatchedSubscription = matchedSubscriptions.iterator().next();

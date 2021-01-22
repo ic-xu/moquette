@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2012-2018 The original author or authors
- * ------------------------------------------------------
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Apache License v2.0 which accompanies this distribution.
- *
- * The Eclipse Public License is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * The Apache License v2.0 is available at
- * http://www.opensource.org/licenses/apache2.0.php
- *
- * You may elect to redistribute this code under either of these licenses.
- */
-
 package io.moquette.broker.security;
 
 import io.moquette.broker.subscriptions.Topic;
@@ -24,7 +8,7 @@ import java.util.*;
 /**
  * Used by the ACLFileParser to push all authorizations it finds. ACLAuthorizator uses it in read
  * mode to check it topics matches the ACLs.
- *
+ * <p>
  * Not thread safe.
  */
 class AuthorizationsCollector implements IAuthorizatorPolicy {
@@ -120,8 +104,8 @@ class AuthorizationsCollector implements IAuthorizatorPolicy {
 
         if (isNotEmpty(client) || isNotEmpty(username)) {
             for (Authorization auth : m_patternAuthorizations) {
-                Topic substitutedTopic = new Topic(auth.topic.toString().replace("%c", client).replace("%u", username));
                 if (auth.grant(permission)) {
+                    Topic substitutedTopic = new Topic(auth.topic.toString().replace("%c", client).replace("%u", username));
                     if (topic.match(substitutedTopic)) {
                         return true;
                     }
@@ -143,6 +127,9 @@ class AuthorizationsCollector implements IAuthorizatorPolicy {
     private boolean matchACL(List<Authorization> auths, Topic topic, Authorization.Permission permission) {
         for (Authorization auth : auths) {
             if (auth.grant(permission)) {
+                if (auth.topic.toString().equals("*")) {
+                    return true;
+                }
                 if (topic.match(auth.topic)) {
                     return true;
                 }

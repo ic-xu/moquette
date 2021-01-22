@@ -112,7 +112,7 @@ class DefaultMoquetteSslContextCreator implements ISslContextCreator {
             LOG.warn("The keystore password is null or empty. The SSL context won't be initialized.");
             return null;
         }
-        String ksType = props.getProperty(BrokerConstants.KEY_STORE_TYPE, "jks");
+        String ksType = props.getProperty(BrokerConstants.KEY_STORE_TYPE, "JKS");
         final KeyStore keyStore = KeyStore.getInstance(ksType);
         LOG.info("Loading keystore. KeystorePath = {}.", jksPath);
         try (InputStream jksInputStream = jksDatastore(jksPath)) {

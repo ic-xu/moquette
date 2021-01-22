@@ -15,7 +15,6 @@
  */
 package io.moquette.broker.subscriptions;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +25,7 @@ class CNode {
     Set<Subscription> subscriptions;
 
     CNode() {
-        this.children = ConcurrentHashMap.newKeySet();
+        this.children = ConcurrentHashMap.newKeySet(1024*100);
         this.subscriptions = ConcurrentHashMap.newKeySet();
     }
 
@@ -36,7 +35,7 @@ class CNode {
         this.subscriptions = ConcurrentHashMap.newKeySet();
         this.subscriptions.addAll(subscriptions);
 //        new HashSet<>(subscriptions);
-        this.children = ConcurrentHashMap.newKeySet();
+        this.children = ConcurrentHashMap.newKeySet(1024*100);
         this.children.addAll(children);
     }
 

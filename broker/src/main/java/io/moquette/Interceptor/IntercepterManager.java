@@ -1,4 +1,4 @@
 package io.moquette.Interceptor;
 
-public class IntercepterManager {
+public class IntercepterManager  {
 }

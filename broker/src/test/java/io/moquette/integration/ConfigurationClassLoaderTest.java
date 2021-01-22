@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;

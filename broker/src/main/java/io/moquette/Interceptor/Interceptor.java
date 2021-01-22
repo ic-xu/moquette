@@ -1,13 +1,30 @@
 package io.moquette.Interceptor;
 
-import java.lang.reflect.Method;
+import io.moquette.interception.messages.*;
 
-public interface Process {
 
-    //真实对象前调用返回true，反射真实对象的方法；返回false时则调用around方法
-     boolean before(Object proxy, Object target, Method method, Object[] args);
+public interface Interceptor {
 
-     void around(Object proxy, Object target, Method method, Object[] args);
+    void onConnect(InterceptConnectMessage msg);
 
-     void after(Object proxy, Object target, Method method, Object[] args);
+    void onSubscribe(InterceptSubscribeMessage msg);
+
+    void onUnsubscribe(InterceptUnsubscribeMessage msg);
+
+    void onPublish(InterceptPublishMessage msg);
+
+    void onPubRec(InterceptPublishMessage msg);
+
+    void onPubComp(InterceptPublishMessage msg);
+
+    void onPubRel(InterceptPublishMessage msg);
+
+    void onPubAck(InterceptPublishMessage msg);
+
+    void onDisconnect(InterceptDisconnectMessage msg);
+
+    void onConnectionLost(InterceptConnectionLostMessage msg);
+
+    void onMessageAcknowledged(InterceptAcknowledgedMessage msg);
+
 }

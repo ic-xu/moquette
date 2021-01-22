@@ -16,6 +16,7 @@
 
 package io.moquette.broker;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.handler.codec.mqtt.MqttMessage;
@@ -63,15 +64,11 @@ public class NewNettyMQTTHandler extends ChannelInboundHandlerAdapter {
         } catch (Throwable ex) {
             //ctx.fireExceptionCaught(ex);
             LOG.error("Error processing protocol message: {}", msg.fixedHeader().messageType(), ex);
-            ctx.channel().close().addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) {
-                    LOG.info("Closed client channel due to exception in processing");
-                }
-            });
+            ctx.channel().close().addListener((ChannelFutureListener) future -> LOG.info("Closed client channel due to exception in processing"));
         } finally {
             ReferenceCountUtil.release(msg);
         }
+
     }
 
     @Override

@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2012-2018 The original author or authors
- * ------------------------------------------------------
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Apache License v2.0 which accompanies this distribution.
- *
- * The Eclipse Public License is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * The Apache License v2.0 is available at
- * http://www.opensource.org/licenses/apache2.0.php
- *
- * You may elect to redistribute this code under either of these licenses.
- */
 package io.moquette.broker;
 
 import io.moquette.interception.BrokerInterceptor;
@@ -25,16 +10,14 @@ import io.netty.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.moquette.broker.Utils.messageId;
 import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
 import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
-class PostOffice {
+public class PostOffice {
 
     private static final Logger LOG = LoggerFactory.getLogger(PostOffice.class);
 
@@ -43,6 +26,12 @@ class PostOffice {
     private final IRetainedRepository retainedRepository;
     private SessionRegistry sessionRegistry;
     private BrokerInterceptor interceptor;
+    private List<String> registerUserName;
+
+    public void addRegisterUserName(String... registerUser) {
+        registerUserName = new ArrayList<>();
+        registerUserName.addAll(Arrays.asList(registerUser));
+    }
 
     PostOffice(ISubscriptionsDirectory subscriptions, IRetainedRepository retainedRepository,
                SessionRegistry sessionRegistry, BrokerInterceptor interceptor, Authorizator authorizator) {
@@ -59,7 +48,7 @@ class PostOffice {
 
     public void fireWill(Session.Will will) {
         // MQTT 3.1.2.8-17
-        publish2Subscribers(will.payload, new Topic(will.topic), will.qos);
+        publish2Subscribers(will.payload, new Topic(will.topic), will.qos, true);
     }
 
     public void subscribeClientToTopics(MqttSubscribeMessage msg, String clientID, String username,
@@ -67,6 +56,9 @@ class PostOffice {
         // verify which topics of the subscribe ongoing has read access permission
         int messageID = messageId(msg);
         List<MqttTopicSubscription> ackTopics = authorizator.verifyTopicsReadAccess(clientID, username, msg);
+
+        //移除系统订阅
+        ackTopics.removeIf(subscrib -> subscrib.topicName().startsWith("$SYS_") && !registerUserName.contains(username));
 
         //create mqttSubAckMessageBody
         MqttSubAckMessage ackMessage = doAckMessageFromValidateFilters(ackTopics, messageID);
@@ -143,7 +135,7 @@ class PostOffice {
                 // close the connection, not valid topicFilter is a protocol violation
                 mqttConnection.dropConnection();
                 LOG.warn("Topic filter is not valid. CId={}, topics: {}, offending topic filter: {}", clientID,
-                         topics, topic);
+                    topics, topic);
                 return;
             }
 
@@ -154,8 +146,7 @@ class PostOffice {
 //            clientSession.unsubscribeFrom(topic);
             // add the subscriptions to Session
             Session session = sessionRegistry.retrieve(clientID);
-            session.unSubscriptions(topics,clientID);
-
+            session.unSubscriptions(topics, clientID);
 
 
             String username = NettyUtils.userName(mqttConnection.channel);
@@ -172,7 +163,9 @@ class PostOffice {
             LOG.error("MQTT client: {} is not authorized to publish on topic: {}", clientID, topic);
             return;
         }
-        publish2Subscribers(payload, topic, AT_MOST_ONCE);
+
+        boolean isNeedBroadcasting = (registerUserName != null && !registerUserName.contains(username));
+        publish2Subscribers(payload, topic, AT_MOST_ONCE, isNeedBroadcasting);
 
         if (retain) {
             // QoS == 0 && retain => clean old retained
@@ -196,8 +189,8 @@ class PostOffice {
             LOG.error("MQTT client: {} is not authorized to publish on topic: {}", clientId, topic);
             return;
         }
-
-        publish2Subscribers(payload, topic, AT_LEAST_ONCE);
+        boolean isNeedBroadcasting = (registerUserName != null && !registerUserName.contains(username));
+        publish2Subscribers(payload, topic, AT_LEAST_ONCE, isNeedBroadcasting);
 
         connection.sendPubAck(messageID);
 
@@ -212,8 +205,8 @@ class PostOffice {
         interceptor.notifyTopicPublished(msg, clientId, username);
     }
 
-    private void publish2Subscribers(ByteBuf origPayload, Topic topic, MqttQoS publishingQos) {
-        Set<Subscription> topicMatchingSubscriptions = subscriptions.matchQosSharpening(topic);
+    private void publish2Subscribers(ByteBuf origPayload, Topic topic, MqttQoS publishingQos, boolean isNeedBroadcasting) {
+        Set<Subscription> topicMatchingSubscriptions = subscriptions.matchQosSharpening(topic, isNeedBroadcasting);
 
         for (final Subscription sub : topicMatchingSubscriptions) {
             MqttQoS qos = lowerQosToTheSubscriptionDesired(sub, publishingQos);
@@ -222,7 +215,7 @@ class PostOffice {
             boolean isSessionPresent = targetSession != null;
             if (isSessionPresent) {
                 LOG.debug("Sending PUBLISH message to active subscriber CId: {}, topicFilter: {}, qos: {}",
-                          sub.getClientId(), sub.getTopicFilter(), qos);
+                    sub.getClientId(), sub.getTopicFilter(), qos);
                 // we need to retain because duplicate only copy r/w indexes and don't retain() causing refCnt = 0
                 ByteBuf payload = origPayload.retainedDuplicate();
                 targetSession.sendPublishOnSessionAtQos(topic, qos, payload);
@@ -230,7 +223,7 @@ class PostOffice {
                 // If we are, the subscriber disconnected after the subscriptions tree selected that session as a
                 // destination.
                 LOG.debug("PUBLISH to not yet present session. CId: {}, topicFilter: {}, qos: {}", sub.getClientId(),
-                          sub.getTopicFilter(), qos);
+                    sub.getTopicFilter(), qos);
             }
         }
     }
@@ -250,7 +243,8 @@ class PostOffice {
             return;
         }
 
-        publish2Subscribers(payload, topic, EXACTLY_ONCE);
+        boolean isNeedBroadcasting = (registerUserName != null && !registerUserName.contains(username));
+        publish2Subscribers(payload, topic, EXACTLY_ONCE, isNeedBroadcasting);
 
         final boolean retained = mqttPublishMessage.fixedHeader().isRetain();
         if (retained) {
@@ -280,8 +274,7 @@ class PostOffice {
      * also doesn't notifyTopicPublished because using internally the owner should already know
      * where it's publishing.
      *
-     * @param msg
-     *            the message to publish
+     * @param msg the message to publish
      */
     public void internalPublish(MqttPublishMessage msg) {
         final MqttQoS qos = msg.fixedHeader().qosLevel();
@@ -289,7 +282,7 @@ class PostOffice {
         final ByteBuf payload = msg.payload();
         LOG.info("Sending internal PUBLISH message Topic={}, qos={}", topic, qos);
 
-        publish2Subscribers(payload, topic, qos);
+        publish2Subscribers(payload, topic, qos, false);
 
         if (!msg.fixedHeader().isRetain()) {
             return;
@@ -304,17 +297,18 @@ class PostOffice {
 
     /**
      * notify MqttConnectMessage after connection established (already pass login).
+     *
      * @param msg
      */
     void dispatchConnection(MqttConnectMessage msg) {
         interceptor.notifyClientConnected(msg);
     }
 
-    void dispatchDisconnection(String clientId,String userName) {
+    void dispatchDisconnection(String clientId, String userName) {
         interceptor.notifyClientDisconnected(clientId, userName);
     }
 
-    void dispatchConnectionLost(String clientId,String userName) {
+    void dispatchConnectionLost(String clientId, String userName) {
         interceptor.notifyClientConnectionLost(clientId, userName);
     }
 

@@ -26,7 +26,7 @@ public interface ISubscriptionsDirectory {
 
     Set<Subscription> matchWithoutQosSharpening(Topic topic);
 
-    Set<Subscription> matchQosSharpening(Topic topic);
+    Set<Subscription> matchQosSharpening(Topic topic,boolean isNeedBroadcasting);
 
     void add(Subscription newSubscription);
 

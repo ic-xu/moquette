@@ -41,7 +41,7 @@ import static io.netty.handler.codec.mqtt.MqttQoS.*;
 /**
  *  message handle core
  */
-final class MQTTConnection {
+public final class MQTTConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(MQTTConnection.class);
 
@@ -64,7 +64,7 @@ final class MQTTConnection {
         this.connected = false;
     }
 
-    void handleMessage(MqttMessage msg) {
+   public void handleMessage(MqttMessage msg) {
         MqttMessageType messageType = msg.fixedHeader().messageType();
         LOG.debug("Received MQTT message, type: {}, channel: {}", messageType, channel);
         switch (messageType) {
@@ -385,6 +385,7 @@ final class MQTTConnection {
             }
             case EXACTLY_ONCE: {
                 final int messageID = msg.variableHeader().packetId();
+                //存储消息
                 bindedSession.receivedPublishQos2(messageID, msg);
                 postOffice.receivedPublishQos2(this, msg, username);
 //                msg.release();
@@ -532,5 +533,9 @@ final class MQTTConnection {
             // TODO drain all messages in target's session in-flight message queue
             bindedSession.flushAllQueuedMessages();
         }
+    }
+
+    public void clossConnection(){
+        channel.close().addListener((ChannelFutureListener) future -> LOG.info("Closed client channel due to exception in processing"));
     }
 }

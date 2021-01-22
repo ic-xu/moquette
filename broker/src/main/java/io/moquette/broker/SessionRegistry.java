@@ -149,7 +149,8 @@ public class SessionRegistry {
             //remove(clientId);
             creationResult = new SessionCreationResult(newSession, CreationModeEnum.DROP_EXISTING, true);
         }
-
+        //把消息分发给新的session
+        newSession.addInflightWindow(oldSession.getInflightWindow());
         final boolean published;
         if (creationResult.mode == CreationModeEnum.DROP_EXISTING) {
             LOG.debug("Drop session of already connected client with same id");
@@ -170,7 +171,7 @@ public class SessionRegistry {
         //verify if subscription still satisfy read ACL permissions
         for (Subscription existingSub : session.getSubscriptions()) {
             final boolean topicReadable = authorizator.canRead(existingSub.getTopicFilter(), username,
-                                                               session.getClientID());
+                session.getClientID());
             if (!topicReadable) {
                 subscriptionsDirectory.removeSubscription(existingSub.getTopicFilter(), session.getClientID());
             }
@@ -188,7 +189,7 @@ public class SessionRegistry {
     private Session createNewSession(MqttConnectMessage msg, String clientId) {
         final boolean clean = msg.variableHeader().isCleanSession();
         final Queue<SessionRegistry.EnqueuedMessage> sessionQueue =
-                    queues.computeIfAbsent(clientId, (String cli) -> queueRepository.createQueue(cli, clean));
+            queues.computeIfAbsent(clientId, (String cli) -> queueRepository.createQueue(cli, clean));
         final Session newSession;
         if (msg.variableHeader().isWillFlag()) {
             final Session.Will will = createWill(msg);

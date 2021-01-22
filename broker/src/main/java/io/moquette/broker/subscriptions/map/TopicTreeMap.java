@@ -6,7 +6,7 @@ import io.moquette.broker.subscriptions.TopicMapSubscriptionDirectory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TopicMap {
+public class TopicTreeMap {
 
     private String topicStringName;
 
@@ -18,10 +18,10 @@ public class TopicMap {
     /**
      * 延迟初始化
      */
-    private Map<String, TopicMap> children;
+    private Map<String, TopicTreeMap> children;
 
 
-    public Map<String, TopicMap> getChildren() {
+    public Map<String, TopicTreeMap> getChildren() {
         return children;
     }
 
@@ -29,7 +29,7 @@ public class TopicMap {
         return subscriptions;
     }
 
-    public TopicMap(String topicStringName) {
+    public TopicTreeMap(String topicStringName) {
         this.topicStringName = topicStringName;
     }
 
@@ -65,12 +65,12 @@ public class TopicMap {
             if (null == children) {
                 children = new ConcurrentHashMap<>();
             }
-            TopicMap topicMap = children.get(remove);
-            if (topicMap == null) {
-                topicMap = new TopicMap(remove);
+            TopicTreeMap topicTreeMap = children.get(remove);
+            if (topicTreeMap == null) {
+                topicTreeMap = new TopicTreeMap(remove);
             }
-            topicMap.registerTopic(subscription, topicsRetain);
-            children.put(remove, topicMap);
+            topicTreeMap.registerTopic(subscription, topicsRetain);
+            children.put(remove, topicTreeMap);
 
         }
     }
@@ -85,22 +85,25 @@ public class TopicMap {
 
         if (topics.length < 1) {
         } else if (topics.length == 1) {
-            TopicMap topicMap = children.get(topics[0]);
-            if (topicMap != null) {
-                Set<Subscription> subscriptionsTmp = topicMap.getSubscriptions();
+            if(null==children){
+                return;
+            }
+            TopicTreeMap topicTreeMap = children.get(topics[0]);
+            if (topicTreeMap != null) {
+                Set<Subscription> subscriptionsTmp = topicTreeMap.getSubscriptions();
                 if (null != subscriptionsTmp) {
                     boolean remove = subscriptionsTmp.remove(subscription);
                     if (remove) {
                         TopicMapSubscriptionDirectory.size.decrementAndGet();
                     }
                     if (subscriptionsTmp.size() == 0) {
-                        if (null == topicMap.getChildren() || topicMap.getChildren().size() == 0) {
-                            topicMap.cleanChildren();
+                        if (null == topicTreeMap.getChildren() || topicTreeMap.getChildren().size() == 0) {
+                            topicTreeMap.cleanChildren();
                         }
-                        topicMap.cleanSubscriptions();
+                        topicTreeMap.cleanSubscriptions();
                     }
                 }
-                if (null == topicMap.getChildren() && null == topicMap.getSubscriptions()) {
+                if (null == topicTreeMap.getChildren() && null == topicTreeMap.getSubscriptions()) {
                     children.remove(topics[0]);
                 }
                 if (null == children || children.size() == 0) {
@@ -111,11 +114,11 @@ public class TopicMap {
 //            subscriptions.remove(subscription);
         } else {
             String topicRetain = topics[0];
-            TopicMap topicMap = children.get(topicRetain);
-            if (null != topicMap) {
+            TopicTreeMap topicTreeMap = children.get(topicRetain);
+            if (null != topicTreeMap) {
                 String[] topicsRetain = Arrays.copyOfRange(topics, 1, topics.length);
-                topicMap.unRegisterTopic(subscription, topicsRetain);
-                if(null==topicMap.children && null == topicMap.getSubscriptions()){
+                topicTreeMap.unRegisterTopic(subscription, topicsRetain);
+                if(null== topicTreeMap.children && null == topicTreeMap.getSubscriptions()){
                     children.remove(topicRetain);
                 }
             }
@@ -129,17 +132,17 @@ public class TopicMap {
         if (topics.length <= 1) {
             if (children != null) {
                 /** 精确匹配的情况 */
-                TopicMap topicMap = children.get(topics[0].trim());
-                if (null != topicMap) {
-                    Set<Subscription> subscriptions = topicMap.getSubscriptions();
+                TopicTreeMap topicTreeMap = children.get(topics[0].trim());
+                if (null != topicTreeMap) {
+                    Set<Subscription> subscriptions = topicTreeMap.getSubscriptions();
                     if (null != subscriptions)
                         subscriptionsResult.addAll(subscriptions);
 
-                    if (null != topicMap.getChildren()) {
+                    if (null != topicTreeMap.getChildren()) {
                         /** 当前层级下的多层结构 */
-                        TopicMap multiLevelTopicMap = topicMap.getChildren().get("#");
-                        if (null != multiLevelTopicMap) {
-                            Set<Subscription> multiLevelSubscription = multiLevelTopicMap.getSubscriptions();
+                        TopicTreeMap multiLevelTopicTreeMap = topicTreeMap.getChildren().get("#");
+                        if (null != multiLevelTopicTreeMap) {
+                            Set<Subscription> multiLevelSubscription = multiLevelTopicTreeMap.getSubscriptions();
                             if (null != multiLevelSubscription)
                                 subscriptionsResult.addAll(multiLevelSubscription);
                         }
@@ -147,7 +150,7 @@ public class TopicMap {
                 }
 
                 /** 订阅当前层级的情况 + */
-                TopicMap currentLevel = children.get("+");
+                TopicTreeMap currentLevel = children.get("+");
                 if (null != currentLevel) {
                     Set<Subscription> subscriptions = currentLevel.getSubscriptions();
                     if (null != subscriptions)
@@ -155,7 +158,7 @@ public class TopicMap {
                 }
 
                 /** 订阅当前层级下所有的情况 # */
-                TopicMap currentLevelAll = children.get("#");
+                TopicTreeMap currentLevelAll = children.get("#");
                 if (null != currentLevelAll) {
                     Set<Subscription> subscriptions = currentLevelAll.getSubscriptions();
                     if (null != subscriptions)
@@ -167,7 +170,7 @@ public class TopicMap {
 
 
         //订阅当前主题一下的情况 #
-        TopicMap currentTopicAll = children.get("#");
+        TopicTreeMap currentTopicAll = children.get("#");
         if (null != currentTopicAll) {
             subscriptionsResult.addAll(currentTopicAll.getSubscriptions());
         }
@@ -177,15 +180,15 @@ public class TopicMap {
 
         //不包含通配符情况
         String topicString = topics[0];
-        TopicMap topicMap = children.get(topicString);
-        if (topicMap != null) {
-            subscriptionsResult.addAll(topicMap.getSubscriptions(topicsRetain));
+        TopicTreeMap topicTreeMap = children.get(topicString);
+        if (topicTreeMap != null) {
+            subscriptionsResult.addAll(topicTreeMap.getSubscriptions(topicsRetain));
         }
 
         // 含有+ 通配符情况
-        TopicMap CurrentLevelTopicMap = children.get("+");
-        if (CurrentLevelTopicMap != null) {
-            subscriptionsResult.addAll(CurrentLevelTopicMap.getSubscriptions(topicsRetain));
+        TopicTreeMap currentLevelTopicTreeMap = children.get("+");
+        if (currentLevelTopicTreeMap != null) {
+            subscriptionsResult.addAll(currentLevelTopicTreeMap.getSubscriptions(topicsRetain));
         }
         return subscriptionsResult;
     }
