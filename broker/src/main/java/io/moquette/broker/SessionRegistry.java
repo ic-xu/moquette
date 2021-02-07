@@ -149,10 +149,11 @@ public class SessionRegistry {
             //remove(clientId);
             creationResult = new SessionCreationResult(newSession, CreationModeEnum.DROP_EXISTING, true);
         }
-        //把消息分发给新的session
-        newSession.addInflightWindow(oldSession.getInflightWindow());
+        if (!msg.variableHeader().isCleanSession())
+            //把消息分发给新的session
+            newSession.addInflightWindow(oldSession.getInflightWindow());
         final boolean published;
-        if (creationResult.mode == CreationModeEnum.DROP_EXISTING) {
+        if (creationResult.mode != CreationModeEnum.REOPEN_EXISTING) {
             LOG.debug("Drop session of already connected client with same id");
             published = pool.replace(clientId, oldSession, newSession);
         } else {

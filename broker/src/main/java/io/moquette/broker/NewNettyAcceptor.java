@@ -41,6 +41,7 @@ import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,13 +159,13 @@ class NewNettyAcceptor {
         boolean epoll = props.boolProp(BrokerConstants.NETTY_EPOLL_PROPERTY_NAME, false);
         if (epoll) {
             LOG.info("Netty is using Epoll");
-            bossGroup = new EpollEventLoopGroup();
-            workerGroup = new EpollEventLoopGroup();
+            bossGroup = new EpollEventLoopGroup(new DefaultThreadFactory("boss"));
+            workerGroup = new EpollEventLoopGroup(new DefaultThreadFactory("work"));
             channelClass = EpollServerSocketChannel.class;
         } else {
             LOG.info("Netty is using NIO");
-            bossGroup = new NioEventLoopGroup();
-            workerGroup = new NioEventLoopGroup();
+            bossGroup = new NioEventLoopGroup(new DefaultThreadFactory("boss"));
+            workerGroup = new NioEventLoopGroup(new DefaultThreadFactory("worker"));
             channelClass = NioServerSocketChannel.class;
         }
 

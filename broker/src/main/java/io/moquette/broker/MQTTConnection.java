@@ -181,8 +181,7 @@ public final class MQTTConnection {
             return;
         }
 
-        final boolean msgCleanSessionFlag = msg.variableHeader().isCleanSession();
-        boolean isSessionAlreadyPresent = !msgCleanSessionFlag && result.alreadyStored;
+        boolean isSessionAlreadyPresent = !cleanSession && result.alreadyStored;
         final String clientIdUsed = clientId;
         final MqttConnAckMessage ackMessage = MqttMessageBuilders.connAck()
             .returnCode(CONNECTION_ACCEPTED)

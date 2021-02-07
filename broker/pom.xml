@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <relativePath>../</relativePath>
@@ -15,18 +15,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bintray.package>io.moquette.moquette-broker</bintray.package>
-        <netty.version>4.1.56.Final</netty.version>
+        <netty.version>4.1.59.Final-SNAPSHOT</netty.version>
         <netty.tcnative.version>2.0.34.Final</netty.tcnative.version>
         <paho.version>1.2.5</paho.version>
         <h2.version>1.4.199</h2.version>
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.5</version>
         </dependency>
+
 
         <dependency>
             <groupId>io.netty</groupId>
@@ -101,28 +103,28 @@
             <artifactId>oshi-core</artifactId>
             <version>5.3.7</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>io.dropwizard.metrics</groupId>-->
-<!--            <artifactId>metrics-jvm</artifactId>-->
-<!--            <version>3.2.2</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.dropwizard.metrics</groupId>-->
+        <!--            <artifactId>metrics-jvm</artifactId>-->
+        <!--            <version>3.2.2</version>-->
+        <!--        </dependency>-->
 
-<!--        <dependency>-->
-<!--            <groupId>com.librato.metrics</groupId>-->
-<!--            <artifactId>metrics-librato</artifactId>-->
-<!--            <version>5.1.0</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.librato.metrics</groupId>-->
-<!--            <artifactId>librato-java</artifactId>-->
-<!--            <version>2.1.0</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.librato.metrics</groupId>-->
+        <!--            <artifactId>metrics-librato</artifactId>-->
+        <!--            <version>5.1.0</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.librato.metrics</groupId>-->
+        <!--            <artifactId>librato-java</artifactId>-->
+        <!--            <version>2.1.0</version>-->
+        <!--        </dependency>-->
 
-<!--        <dependency>-->
-<!--            <groupId>com.bugsnag</groupId>-->
-<!--            <artifactId>bugsnag</artifactId>-->
-<!--            <version>[3.0,4.0)</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.bugsnag</groupId>-->
+        <!--            <artifactId>bugsnag</artifactId>-->
+        <!--            <version>[3.0,4.0)</version>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>commons-codec</groupId>
@@ -131,32 +133,32 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.hdrhistogram</groupId>-->
-            <!--<artifactId>HdrHistogram</artifactId>-->
-            <!--<version>2.1.4</version>-->
+        <!--<groupId>org.hdrhistogram</groupId>-->
+        <!--<artifactId>HdrHistogram</artifactId>-->
+        <!--<version>2.1.4</version>-->
         <!--</dependency>-->
 
         <!-- Test dependencies -->
         <!--<dependency>-->
-            <!--<groupId>junit</groupId>-->
-            <!--<artifactId>junit</artifactId>-->
-            <!--<version>4.8.2</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>junit</groupId>-->
+        <!--<artifactId>junit</artifactId>-->
+        <!--<version>4.8.2</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>slf4j-log4j12</artifactId>-->
-            <!--<version>1.7.5</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>org.slf4j</groupId>-->
+        <!--<artifactId>slf4j-log4j12</artifactId>-->
+        <!--<version>1.7.5</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
 
         <!--&lt;!&ndash; needs extra dependencies: objenesis & hamcrest &ndash;&gt;-->
         <!--<dependency>-->
-            <!--<groupId>org.mockito</groupId>-->
-            <!--<artifactId>mockito-core</artifactId>-->
-            <!--<version>1.9.0</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>org.mockito</groupId>-->
+        <!--<artifactId>mockito-core</artifactId>-->
+        <!--<version>1.9.0</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
 
         <dependency>
@@ -181,11 +183,11 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.assertj</groupId>-->
-            <!--<artifactId>assertj-core</artifactId>-->
-            <!--&lt;!&ndash; use 2.6.0 for Java 7 projects &ndash;&gt;-->
-            <!--<version>2.6.0</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>org.assertj</groupId>-->
+        <!--<artifactId>assertj-core</artifactId>-->
+        <!--&lt;!&ndash; use 2.6.0 for Java 7 projects &ndash;&gt;-->
+        <!--<version>2.6.0</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
 
         <dependency>
@@ -211,38 +213,33 @@
         </dependency>
     </dependencies>
 
-<!--    <build>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <systemPropertyVariables>-->
-<!--                        <io.netty.leakDetectionLevel>PARANOID</io.netty.leakDetectionLevel>-->
-<!--                    </systemPropertyVariables>-->
-<!--                    <includes>-->
-<!--                        <include>**/*Test.java</include>-->
-<!--                    </includes>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+    <!--    <build>-->
+    <!--        <plugins>-->
+    <!--            <plugin>-->
+    <!--                <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                <artifactId>maven-surefire-plugin</artifactId>-->
+    <!--                <configuration>-->
+    <!--                    <systemPropertyVariables>-->
+    <!--                        <io.netty.leakDetectionLevel>PARANOID</io.netty.leakDetectionLevel>-->
+    <!--                    </systemPropertyVariables>-->
+    <!--                    <includes>-->
+    <!--                        <include>**/*Test.java</include>-->
+    <!--                    </includes>-->
+    <!--                </configuration>-->
+    <!--            </plugin>-->
 
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-compiler-plugin</artifactId>-->
-<!--                <version>3.8.0</version>-->
-<!--                <configuration>-->
-<!--                    <source>8</source>-->
-<!--                    <target>8</target>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+    <!--            <plugin>-->
+    <!--                <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                <artifactId>maven-compiler-plugin</artifactId>-->
+    <!--                <version>3.8.0</version>-->
+    <!--                <configuration>-->
+    <!--                    <source>8</source>-->
+    <!--                    <target>8</target>-->
+    <!--                </configuration>-->
+    <!--            </plugin>-->
 
-<!--        </plugins>-->
-<!--    </build>-->
-
-
-
-
-
+    <!--        </plugins>-->
+    <!--    </build>-->
 
 
     <build>
@@ -272,7 +269,8 @@
                         </manifest>
                     </archive>
                     <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef> <!-- jar包后缀，生成的jar包形式为：project-1.0-SNAPSHOT-jar-with-dependencies.jar -->
+                        <descriptorRef>jar-with-dependencies
+                        </descriptorRef> <!-- jar包后缀，生成的jar包形式为：project-1.0-SNAPSHOT-jar-with-dependencies.jar -->
                     </descriptorRefs>
                 </configuration>
                 <!-- 添加此项后，可直接使用mvn package | mvn install -->
@@ -289,8 +287,6 @@
             </plugin>
         </plugins>
     </build>
-
-
 
 
 </project>
