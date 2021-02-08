@@ -15,11 +15,16 @@
  */
 package io.moquette.broker;
 
+import io.moquette.broker.config.BrokerConfiguration;
+import io.moquette.broker.security.Authorizator;
 import io.moquette.broker.security.PermitAllAuthorizatorPolicy;
-import io.moquette.broker.subscriptions.CTrieSubscriptionDirectory;
+import io.moquette.broker.subscriptions.nodetree.CTrieSubscriptionDirectory;
 import io.moquette.broker.subscriptions.ISubscriptionsDirectory;
 import io.moquette.broker.security.IAuthenticator;
-import io.moquette.persistence.MemorySubscriptionsRepository;
+import io.moquette.persistence.ISubscriptionsRepository;
+import io.moquette.persistence.memory.MemoryQueueRepository;
+import io.moquette.persistence.memory.MemoryRetainedRepository;
+import io.moquette.persistence.memory.MemorySubscriptionsRepository;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
@@ -109,7 +114,7 @@ public class MQTTConnectionConnectTest {
     public void invalidAuthentication() {
         MqttConnectMessage msg = connMsg.clientId(FAKE_CLIENT_ID)
             .username(TEST_USER + "_fake")
-            .password(TEST_PWD)
+            .password(TEST_PWD.getBytes())
             .build();
 
         // Exercise
@@ -134,7 +139,7 @@ public class MQTTConnectionConnectTest {
     @Test
     public void testWillIsAccepted() {
         MqttConnectMessage msg = connMsg.clientId(FAKE_CLIENT_ID).willFlag(true)
-            .willTopic("topic").willMessage("Topic message").build();
+            .willTopic("topic").willMessage("Topic message".getBytes()).build();
 
         // Exercise
         // m_handler.setMessaging(mockedMessaging);
@@ -152,7 +157,7 @@ public class MQTTConnectionConnectTest {
         channel = (EmbeddedChannel) sut.channel;
 
         MqttConnectMessage msg = connMsg.clientId(FAKE_CLIENT_ID).willFlag(true)
-            .willTopic("topic").willMessage("Topic message").build();
+            .willTopic("topic").willMessage("Topic message".getBytes()).build();
         sut.processConnect(msg);
 
         // Exercise
@@ -178,7 +183,7 @@ public class MQTTConnectionConnectTest {
     @Test
     public void validAuthentication() {
         MqttConnectMessage msg = connMsg.clientId(FAKE_CLIENT_ID)
-            .username(TEST_USER).password(TEST_PWD).build();
+            .username(TEST_USER).password(TEST_PWD.getBytes()).build();
 
         // Exercise
         sut.processConnect(msg);
@@ -272,7 +277,7 @@ public class MQTTConnectionConnectTest {
         // Connect a client1
         MqttConnectMessage msg = connMsg.clientId(FAKE_CLIENT_ID)
             .username(TEST_USER)
-            .password(TEST_PWD)
+            .password(TEST_PWD.getBytes())
             .build();
         sut.processConnect(msg);
         assertEqualsConnAck(CONNECTION_ACCEPTED, channel.readOutbound());
@@ -282,7 +287,7 @@ public class MQTTConnectionConnectTest {
             .protocolVersion(MqttVersion.MQTT_3_1)
             .clientId(FAKE_CLIENT_ID)
             .username(EVIL_TEST_USER)
-            .password(EVIL_TEST_PWD)
+            .password(EVIL_TEST_PWD.getBytes())
             .build();
 
         EmbeddedChannel evilChannel = new EmbeddedChannel();
@@ -304,7 +309,7 @@ public class MQTTConnectionConnectTest {
     public void testForceClientDisconnection_issue116() {
         MqttConnectMessage msg = connMsg.clientId(FAKE_CLIENT_ID)
             .username(TEST_USER)
-            .password(TEST_PWD)
+            .password(TEST_PWD.getBytes())
             .build();
         sut.processConnect(msg);
         assertEqualsConnAck(CONNECTION_ACCEPTED, channel.readOutbound());

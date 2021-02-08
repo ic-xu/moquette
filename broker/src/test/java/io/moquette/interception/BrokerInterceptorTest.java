@@ -40,7 +40,7 @@ public class BrokerInterceptorTest {
     // value to check for changes after every notification
     private static final AtomicInteger n = new AtomicInteger(0);
 
-    // Interceptor loaded with a custom InterceptHandler special for the tests
+    // plugin loaded with a custom InterceptHandler special for the tests
     private static final class MockObserver implements InterceptHandler {
 
         @Override

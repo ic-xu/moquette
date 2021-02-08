@@ -18,6 +18,7 @@ package io.moquette.broker;
 
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.BrokerInterceptor;
+import io.moquette.utils.DebugUtils;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.mqtt.*;
 

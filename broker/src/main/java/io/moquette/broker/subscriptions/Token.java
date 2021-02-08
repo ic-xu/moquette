@@ -22,12 +22,12 @@ package io.moquette.broker.subscriptions;
 public class Token {
 
     static final Token EMPTY = new Token("");
-    static final Token MULTI = new Token("#");
-    static final Token SINGLE = new Token("+");
-    static final Token ALL = new Token("*");
-    final String name;
+    public static final Token MULTI = new Token("#");
+    public static final Token SINGLE = new Token("+");
+    public static final Token ALL = new Token("*");
+    public final String name;
 
-    protected Token(String s) {
+    public Token(String s) {
         name = s;
     }
 

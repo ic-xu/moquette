@@ -16,7 +16,7 @@
 
 package io.moquette.broker.config;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 
 /**
  * Base interface for all configuration implementations (filesystem, memory or classpath)

@@ -18,7 +18,7 @@ package io.moquette.broker.metrics;
 import com.codahale.metrics.*;
 import io.moquette.broker.PostOffice;
 import io.moquette.broker.config.IConfig;
-import io.moquette.broker.NettyUtils;
+import io.moquette.utils.NettyUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.mqtt.MqttMessage;
@@ -26,7 +26,7 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 
 import java.util.concurrent.TimeUnit;
 
-import static io.moquette.BrokerConstants.*;
+import static io.moquette.contants.BrokerConstants.*;
 import static io.netty.channel.ChannelHandler.Sharable;
 
 /**

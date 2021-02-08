@@ -6,7 +6,7 @@ if (args.size() == 1) {
     fileName = args[1]
 }
 MVStore s = MVStore.open(fileName)
-// create/get the map named "data"
+// create/get the maptree named "data"
 MVMap<Integer, String> map = s.openMap("data")
 
 numMessages = 10000000

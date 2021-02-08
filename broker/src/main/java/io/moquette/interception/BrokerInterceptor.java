@@ -16,7 +16,7 @@
 
 package io.moquette.interception;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import io.moquette.interception.messages.*;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.subscriptions.Subscription;
@@ -125,7 +125,7 @@ public final class BrokerInterceptor implements Interceptor {
 
         executor.execute(() -> {
                 try {
-                    int messageId = msg.variableHeader().messageId();
+                    int messageId = msg.variableHeader().packetId();
                     String topic = msg.variableHeader().topicName();
                     for (InterceptHandler handler : handlers.get(InterceptPublishMessage.class)) {
                         LOG.debug("Notifying MQTT PUBLISH message to interceptor. CId={}, messageId={}, topic={}, "

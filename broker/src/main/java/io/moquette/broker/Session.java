@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-class Session {
+public class Session {
 
     private static final Logger LOG = LoggerFactory.getLogger(Session.class);
     private static final int FLIGHT_BEFORE_RESEND_MS = 5_000;
@@ -420,7 +420,7 @@ class Session {
 
     public void receivedPublishQos2(int messageID, MqttPublishMessage msg) {
         qos2Receiving.put(messageID, msg);
-        msg.retain(); // retain to put in the inflight map
+        msg.retain(); // retain to put in the inflight maptree
         mqttConnection.sendPublishReceived(messageID);
     }
 

@@ -7,7 +7,7 @@ if (args.size() == 1) {
     fileName = args[1]
 }
 File tmpFile = new File(fileName)
-// create/get the map named "data"
+// create/get the maptree named "data"
 tmpFile.createNewFile()
 DB db = DBMaker.newFileDB(tmpFile).make()
 Map map = db.getHashMap("data")

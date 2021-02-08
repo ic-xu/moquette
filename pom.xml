@@ -54,6 +54,7 @@
         <module>broker</module>
         <module>distribution</module>
         <module>embedding_moquette</module>
+        <module>message-bridge</module>
     </modules>
 
     <dependencies>

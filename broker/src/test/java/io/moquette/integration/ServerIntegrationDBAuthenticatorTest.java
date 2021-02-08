@@ -16,7 +16,7 @@
 
 package io.moquette.integration;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.MemoryConfig;
@@ -28,7 +28,7 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;

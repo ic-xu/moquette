@@ -1,24 +1,12 @@
-/*
- * Copyright (c) 2012-2018 The original author or authors
- * ------------------------------------------------------
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Apache License v2.0 which accompanies this distribution.
- *
- * The Eclipse Public License is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * The Apache License v2.0 is available at
- * http://www.opensource.org/licenses/apache2.0.php
- *
- * You may elect to redistribute this code under either of these licenses.
- */
-
 package io.moquette.broker;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import io.moquette.broker.config.IConfig;
+import io.moquette.broker.handler.AutoFlushHandler;
+import io.moquette.broker.handler.MoquetteIdleTimeoutHandler;
+import io.moquette.broker.handler.NewNettyMQTTHandler;
 import io.moquette.broker.metrics.*;
+import io.moquette.broker.security.ISslContextCreator;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -56,7 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static io.moquette.BrokerConstants.*;
+import static io.moquette.contants.BrokerConstants.*;
 import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
 
 class NewNettyAcceptor {
@@ -145,7 +133,7 @@ class NewNettyAcceptor {
      * @param sslCtxCreator
      * @param postOffice 后面新增的参数，用于发送 Metrics 主题消息
      */
-    public void initialize(NewNettyMQTTHandler mqttHandler, IConfig props, ISslContextCreator sslCtxCreator,PostOffice postOffice) {
+    public void initialize(NewNettyMQTTHandler mqttHandler, IConfig props, ISslContextCreator sslCtxCreator, PostOffice postOffice) {
         LOG.debug("Initializing Netty acceptor");
 
         nettySoBacklog = props.intProp(BrokerConstants.NETTY_SO_BACKLOG_PROPERTY_NAME, 128);
@@ -195,6 +183,7 @@ class NewNettyAcceptor {
         initializePlainTCPTransport(mqttHandler, props);
         initializeWebSocketTransport(mqttHandler, props);
 
+
         /**
          * init SSL netty server
          */
@@ -210,6 +199,13 @@ class NewNettyAcceptor {
     }
 
     private boolean securityPortsConfigured(IConfig props) {
+        String sslTcpPortProp = props.getProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME);
+        String wssPortProp = props.getProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME);
+        return sslTcpPortProp != null || wssPortProp != null;
+    }
+
+
+    private boolean customProtocolConfig(IConfig props) {
         String sslTcpPortProp = props.getProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME);
         String wssPortProp = props.getProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME);
         return sslTcpPortProp != null || wssPortProp != null;

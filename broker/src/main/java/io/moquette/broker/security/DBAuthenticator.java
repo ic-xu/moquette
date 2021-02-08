@@ -17,7 +17,7 @@
 package io.moquette.broker.security;
 
 import com.zaxxer.hikari.HikariDataSource;
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import io.moquette.broker.config.IConfig;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;

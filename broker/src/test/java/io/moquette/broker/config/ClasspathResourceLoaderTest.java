@@ -16,7 +16,7 @@
 
 package io.moquette.broker.config;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

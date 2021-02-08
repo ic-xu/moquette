@@ -16,7 +16,7 @@
 
 package io.moquette.broker.metrics;
 
-import io.moquette.broker.NettyUtils;
+import io.moquette.utils.NettyUtils;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,7 +25,6 @@ import io.netty.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 
 import static io.moquette.broker.Utils.messageId;

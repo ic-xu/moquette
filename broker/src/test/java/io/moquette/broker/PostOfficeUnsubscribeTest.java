@@ -15,13 +15,18 @@
  */
 package io.moquette.broker;
 
+import io.moquette.broker.config.BrokerConfiguration;
+import io.moquette.broker.security.Authorizator;
 import io.moquette.broker.security.PermitAllAuthorizatorPolicy;
-import io.moquette.broker.subscriptions.CTrieSubscriptionDirectory;
+import io.moquette.broker.subscriptions.nodetree.CTrieSubscriptionDirectory;
 import io.moquette.broker.subscriptions.ISubscriptionsDirectory;
 import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.broker.subscriptions.Topic;
 import io.moquette.broker.security.IAuthenticator;
-import io.moquette.persistence.MemorySubscriptionsRepository;
+import io.moquette.persistence.ISubscriptionsRepository;
+import io.moquette.persistence.memory.MemoryQueueRepository;
+import io.moquette.persistence.memory.MemoryRetainedRepository;
+import io.moquette.persistence.memory.MemorySubscriptionsRepository;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;

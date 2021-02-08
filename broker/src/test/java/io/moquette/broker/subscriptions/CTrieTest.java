@@ -16,6 +16,9 @@
 package io.moquette.broker.subscriptions;
 
 
+import io.moquette.broker.subscriptions.nodetree.CNode;
+import io.moquette.broker.subscriptions.nodetree.CTrie;
+import io.moquette.broker.subscriptions.nodetree.INode;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,15 +49,15 @@ public class CTrieTest {
         final Optional<CNode> matchedNode = sut.lookup(asTopic("/"));
         assertTrue("Node on path / must be present", matchedNode.isPresent());
         //verify structure, only root INode and the first CNode should be present
-        assertThat(this.sut.root.mainNode().subscriptions).isEmpty();
+        assertThat(this.sut.root.mainNode().getSubscriptions()).isEmpty();
         assertThat(this.sut.root.mainNode().allChildren()).isNotEmpty();
 
         INode firstLayer = this.sut.root.mainNode().allChildren().get(0);
-        assertThat(firstLayer.mainNode().subscriptions).isEmpty();
+        assertThat(firstLayer.mainNode().getSubscriptions()).isEmpty();
         assertThat(firstLayer.mainNode().allChildren()).isNotEmpty();
 
         INode secondLayer = firstLayer.mainNode().allChildren().get(0);
-        assertThat(secondLayer.mainNode().subscriptions).isNotEmpty();
+        assertThat(secondLayer.mainNode().getSubscriptions()).isNotEmpty();
         assertThat(secondLayer.mainNode().allChildren()).isEmpty();
     }
 
@@ -66,7 +69,7 @@ public class CTrieTest {
         //Verify
         final Optional<CNode> matchedNode = sut.lookup(asTopic("/temp"));
         assertTrue("Node on path /temp must be present", matchedNode.isPresent());
-        assertFalse(matchedNode.get().subscriptions.isEmpty());
+        assertFalse(matchedNode.get().getSubscriptions().isEmpty());
     }
 
     @Test
@@ -93,7 +96,7 @@ public class CTrieTest {
         //Verify
         final Optional<CNode> matchedNode = sut.lookup(asTopic("/temp"));
         assertTrue("Node on path /temp must be present", matchedNode.isPresent());
-        final Set<Subscription> subscriptions = matchedNode.get().subscriptions;
+        final Set<Subscription> subscriptions = matchedNode.get().getSubscriptions();
         assertTrue(subscriptions.contains(newSubscription));
     }
 
@@ -108,7 +111,7 @@ public class CTrieTest {
         //Verify
         final Optional<CNode> matchedNode = sut.lookup(asTopic("/italy/happiness"));
         assertTrue("Node on path /italy/happiness must be present", matchedNode.isPresent());
-        final Set<Subscription> subscriptions = matchedNode.get().subscriptions;
+        final Set<Subscription> subscriptions = matchedNode.get().getSubscriptions();
         assertTrue(subscriptions.contains(happinessSensor));
     }
 

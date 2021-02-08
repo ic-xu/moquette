@@ -16,7 +16,7 @@
 
 package io.moquette.testclient;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

@@ -20,9 +20,9 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.util.Properties;
-import static io.moquette.BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME;
-import static io.moquette.BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.PORT_PROPERTY_NAME;
+import static io.moquette.contants.BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME;
+import static io.moquette.contants.BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME;
+import static io.moquette.contants.BrokerConstants.PORT_PROPERTY_NAME;
 
 /**
  * Used to carry integration configurations.

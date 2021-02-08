@@ -15,7 +15,8 @@
  */
 package io.moquette.persistence;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
+import io.moquette.persistence.h2.H2PersistentQueue;
 import org.h2.mvstore.MVStore;
 import org.junit.After;
 import org.junit.Before;

@@ -15,7 +15,8 @@
  */
 package io.moquette.broker;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
+import io.moquette.broker.config.BrokerConfiguration;
 import io.moquette.broker.config.MemoryConfig;
 import org.junit.Test;
 

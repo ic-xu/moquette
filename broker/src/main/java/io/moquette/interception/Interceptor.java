@@ -26,7 +26,7 @@ import io.netty.handler.codec.mqtt.MqttPublishMessage;
  * <p>
  * An interface is used instead of a class to allow more flexibility in changing an implementation.
  * <p>
- * Interceptor implementations forward notifications to a <code>InterceptHandler</code>, that is
+ * plugin implementations forward notifications to a <code>InterceptHandler</code>, that is
  * normally a field. So, the implementations should act as a proxy to a custom intercept handler.
  *
  * @see InterceptHandler

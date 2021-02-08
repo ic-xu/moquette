@@ -15,15 +15,21 @@
  */
 package io.moquette.broker;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import io.moquette.broker.config.*;
-import io.moquette.broker.subscriptions.TopicMapSubscriptionDirectory;
+import io.moquette.broker.handler.NewNettyMQTTHandler;
+import io.moquette.broker.subscriptions.maptree.TopicMapSubscriptionDirectory;
 import io.moquette.interception.InterceptHandler;
-import io.moquette.persistence.H2Builder;
-import io.moquette.persistence.MemorySubscriptionsRepository;
+import io.moquette.persistence.IQueueRepository;
+import io.moquette.persistence.IRetainedRepository;
+import io.moquette.broker.security.ISslContextCreator;
+import io.moquette.persistence.ISubscriptionsRepository;
+import io.moquette.persistence.h2.H2Builder;
+import io.moquette.persistence.memory.MemoryQueueRepository;
+import io.moquette.persistence.memory.MemoryRetainedRepository;
+import io.moquette.persistence.memory.MemorySubscriptionsRepository;
 import io.moquette.interception.BrokerInterceptor;
 import io.moquette.broker.security.*;
-import io.moquette.broker.subscriptions.CTrieSubscriptionDirectory;
 import io.moquette.broker.subscriptions.ISubscriptionsDirectory;
 import io.moquette.broker.security.IAuthenticator;
 import io.moquette.broker.security.IAuthorizatorPolicy;
@@ -100,14 +106,14 @@ public class Server {
 
     /**
      * Starts the integration with the given properties.
-     * <p>
+     *
      * Its suggested to at least have the following properties:
      * <ul>
      * <li>port</li>
      * <li>password_file</li>
      * </ul>
      *
-     * @param configProps the properties map to use as configuration.
+     * @param configProps the properties maptree to use as configuration.
      * @throws IOException in case of any IO Error.
      */
     public void startServer(Properties configProps) throws IOException {

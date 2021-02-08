@@ -29,7 +29,7 @@ public final class Subscription implements Serializable {
     private static final long serialVersionUID = -3383457629635732794L;
     private final MqttQoS requestedQos; // max QoS acceptable
     final String clientId;
-    final Topic topicFilter;
+    public final Topic topicFilter;
 
     public Subscription(String clientId, Topic topicFilter, MqttQoS requestedQos) {
         this.requestedQos = requestedQos;

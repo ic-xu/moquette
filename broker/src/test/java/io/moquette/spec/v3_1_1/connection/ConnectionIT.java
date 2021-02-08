@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import io.moquette.BrokerConstants;
+import io.moquette.contants.BrokerConstants;
 import io.moquette.integration.IntegrationUtils;
 import io.moquette.testclient.RawClient;
 import org.junit.After;

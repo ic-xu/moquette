@@ -1,5 +1,6 @@
 package io.moquette.broker;
 
+import io.moquette.broker.config.BrokerConfiguration;
 import io.moquette.broker.subscriptions.Topic;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
