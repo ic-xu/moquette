@@ -80,6 +80,8 @@ public class PostOffice {
 
         // add the subscriptions to Session
         Session session = sessionRegistry.retrieve(clientID);
+
+        // 把用户的订阅消息保存到自己的session 中。
         session.addSubscriptions(newSubscriptions);
 
         // send ack message

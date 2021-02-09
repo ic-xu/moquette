@@ -311,6 +311,12 @@ public class Session {
         // TODO remain to invoke in somehow m_interceptor.notifyMessageAcknowledged
         inflightWindow.remove(ackPacketId);
         inflightSlots.incrementAndGet();
+        for (InFlightPacket next : inflightTimeouts) {
+            if (next.packetId == ackPacketId) {
+                inflightTimeouts.remove(next);
+                break;
+            }
+        }
         drainQueueToConnection();
     }
 
@@ -349,15 +355,29 @@ public class Session {
 //    }
 
     public void resendInflightNotAcked() {
-        InFlightPacket notAckPacketId = inflightTimeouts.poll();
-        while (notAckPacketId != null) {
+        InFlightPacket notAckPacketId = inflightTimeouts.peek();
+        if (notAckPacketId != null) {
             if (inflightWindow.containsKey(notAckPacketId.packetId)) {
                 final SessionRegistry.PublishedMessage msg =
                     (SessionRegistry.PublishedMessage) inflightWindow.get(notAckPacketId.packetId);
-                sessionQueue.add(msg);
-                notAckPacketId = inflightTimeouts.poll();
+                final Topic topic = msg.topic;
+                final MqttQoS qos = msg.publishingQos;
+                final ByteBuf payload = msg.payload;
+                final ByteBuf copiedPayload = payload.retainedDuplicate();
+                MqttPublishMessage publishMsg = publishNotRetainedDuplicated(notAckPacketId, topic, qos, copiedPayload);
+                mqttConnection.sendPublish(publishMsg);
             }
         }
+
+
+//            while (notAckPacketId != null) {
+//                if (inflightWindow.containsKey(notAckPacketId.packetId)) {
+//                    final SessionRegistry.PublishedMessage msg =
+//                        (SessionRegistry.PublishedMessage) inflightWindow.get(notAckPacketId.packetId);
+//                    sessionQueue.add(msg);
+//                    notAckPacketId = inflightTimeouts.poll();
+//                }
+//            }
     }
 
 
@@ -373,7 +393,8 @@ public class Session {
         LOG.debug("Resending {} in flight packets [{}]", expired.size(), sb);
     }
 
-    private MqttPublishMessage publishNotRetainedDuplicated(InFlightPacket notAckPacketId, Topic topic, MqttQoS qos,
+    private MqttPublishMessage publishNotRetainedDuplicated(InFlightPacket notAckPacketId, Topic topic, MqttQoS
+        qos,
                                                             ByteBuf payload) {
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, true, qos, false, 0);
         MqttPublishVariableHeader varHeader = new MqttPublishVariableHeader(topic.toString(), notAckPacketId.packetId);
@@ -381,6 +402,7 @@ public class Session {
     }
 
     private void drainQueueToConnection() {
+        resendInflightNotAcked();
         // consume the queue
         while (!sessionQueue.isEmpty() && inflighHasSlotsAndConnectionIsUp()) {
             final SessionRegistry.EnqueuedMessage msg = sessionQueue.remove();

@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -48,4 +50,23 @@ public class SessionTest {
         client.sendPublishOnSessionAtQos(destinationTopic, MqttQoS.AT_LEAST_ONCE, payload);
     }
 
+
+    @Test
+    public void testDelayQueue() throws InterruptedException {
+        final DelayQueue<Session.InFlightPacket> inflightTimeouts = new DelayQueue<>();
+
+        for (int i = 0; i < 30; i++) {
+            inflightTimeouts.add(new Session.InFlightPacket(i, 5_000));
+            System.out.println(inflightTimeouts.size());
+        }
+
+        for (Session.InFlightPacket f:inflightTimeouts) {
+            if(f.packetId==10 ||f.packetId==20){
+                inflightTimeouts.remove(f);
+            }
+        }
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        System.out.println(inflightTimeouts.size());
+
+    }
 }
