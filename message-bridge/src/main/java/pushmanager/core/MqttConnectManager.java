@@ -1,5 +1,6 @@
 package pushmanager.core;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import pushmanager.core.mode.ClientInfo;
@@ -58,6 +59,7 @@ public class MqttConnectManager {
     }
 
     class ConnectWork implements Runnable {
+        @SneakyThrows
         @Override
         public void run() {
             ClientInfoRepository clientInfoRepository = SpringbootApplicationUtils.getBean(ClientInfoRepository.class);

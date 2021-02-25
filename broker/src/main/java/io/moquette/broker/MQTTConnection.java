@@ -257,12 +257,13 @@ public final class MQTTConnection {
                 LOG.info("Client didn't supply any password and MQTT anonymous mode is disabled CId={}", clientId);
                 return false;
             }
-            final String login = msg.payload().userName();
-            if (!authenticator.checkValid(clientId, login, pwd)) {
-                LOG.info("Authenticator has rejected the MQTT credentials CId={}, username={}", clientId, login);
+            final String userNameString = msg.payload().userName();
+            if (!authenticator.checkValid(clientId, userNameString, pwd)) {
+                LOG.info("Authenticator has rejected the MQTT credentials CId={}, username={}", clientId, userNameString);
                 return false;
             }
-            NettyUtils.userName(channel, login);
+            NettyUtils.userName(channel, userNameString);
+            sessionRegistry.registerUserName(userNameString,clientId);
         } else if (!brokerConfig.isAllowAnonymous()) {
             LOG.info("Client didn't supply any credentials and MQTT anonymous mode is disabled. CId={}", clientId);
             return false;

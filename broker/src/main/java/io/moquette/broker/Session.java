@@ -22,7 +22,7 @@ public class Session {
 
     private static final Logger LOG = LoggerFactory.getLogger(Session.class);
     private static final int FLIGHT_BEFORE_RESEND_MS = 5_000;
-    private static final int INFLIGHT_WINDOW_SIZE = 10;
+    private static int INFLIGHT_WINDOW_SIZE = 10;
 
     static class InFlightPacket implements Delayed {
 
@@ -100,14 +100,15 @@ public class Session {
     }
 
 
-    Session(String clientId, boolean clean, Will will, Queue<SessionRegistry.EnqueuedMessage> sessionQueue) {
-        this(clientId, clean, sessionQueue);
+    Session(String clientId, boolean clean, Will will, Queue<SessionRegistry.EnqueuedMessage> sessionQueue,Integer receiveMaximum) {
+        this(clientId, clean, sessionQueue,receiveMaximum);
         this.will = will;
     }
 
-    Session(String clientId, boolean clean, Queue<SessionRegistry.EnqueuedMessage> sessionQueue) {
+    Session(String clientId, boolean clean, Queue<SessionRegistry.EnqueuedMessage> sessionQueue,Integer receiveMaximum) {
         this.clientId = clientId;
         this.clean = clean;
+        this.INFLIGHT_WINDOW_SIZE = receiveMaximum;
         this.sessionQueue = sessionQueue;
     }
 

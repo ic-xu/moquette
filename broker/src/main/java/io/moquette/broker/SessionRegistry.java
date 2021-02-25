@@ -15,9 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -66,6 +64,7 @@ public class SessionRegistry {
     private final ISubscriptionsDirectory subscriptionsDirectory;
     private final IQueueRepository queueRepository;
     private final Authorizator authorizator;
+    private final Map<String, Set<String>> usernamePool = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Queue<SessionRegistry.EnqueuedMessage>> queues = new ConcurrentHashMap<>();
 
     SessionRegistry(ISubscriptionsDirectory subscriptionsDirectory,
@@ -75,6 +74,18 @@ public class SessionRegistry {
         this.queueRepository = queueRepository;
         this.authorizator = authorizator;
     }
+
+
+    public void registerUserName(String username, String clientId) {
+        Set<String> pool = usernamePool.computeIfAbsent(username, k -> new HashSet<>());
+        pool.add(clientId);
+    }
+
+
+    public Set<String> getClientIdByUsername(String username) {
+        return usernamePool.get(username);
+    }
+
 
     SessionCreationResult createOrReopenSession(MqttConnectMessage msg, String clientId, String username) {
         SessionCreationResult postConnectAction;
@@ -182,9 +193,9 @@ public class SessionRegistry {
         final Session newSession;
         if (msg.variableHeader().isWillFlag()) {
             final Session.Will will = createWill(msg);
-            newSession = new Session(clientId, clean, will, sessionQueue);
+            newSession = new Session(clientId, clean, will, sessionQueue,10);
         } else {
-            newSession = new Session(clientId, clean, sessionQueue);
+            newSession = new Session(clientId, clean, sessionQueue,10);
         }
 
         newSession.markConnecting();

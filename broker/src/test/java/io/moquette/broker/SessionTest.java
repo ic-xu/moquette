@@ -21,7 +21,7 @@ public class SessionTest {
     @Test
     public void testPubAckDrainMessagesRemainingInQueue() {
         final Queue<SessionRegistry.EnqueuedMessage> queuedMessages = new ConcurrentLinkedQueue<>();
-        final Session client = new Session("Subscriber", true, null, queuedMessages);
+        final Session client = new Session("Subscriber", true, null, queuedMessages,10);
         final EmbeddedChannel testChannel = new EmbeddedChannel();
         BrokerConfiguration brokerConfiguration = new BrokerConfiguration(true, false, false, false);
         MQTTConnection mqttConnection = new MQTTConnection(testChannel, brokerConfiguration, null, null, null);

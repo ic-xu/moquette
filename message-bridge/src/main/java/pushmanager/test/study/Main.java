@@ -14,12 +14,12 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println(aa);
-//        String values = "A+B*(C-(D+F))/E";
-//        ParseExpresstion tree = new TreeParse();
-//        tree.setExpresstion(values);
-//
-//        System.out.println(tree.toSuffixString());
-//        System.out.println(tree.toPrefixString());
+        String values = "A+B*(C-(D+F))/E";
+        ParseExpresstion tree = new TreeParse();
+        tree.setExpresstion(values);
+
+        System.out.println(tree.toSuffixString());
+        System.out.println(tree.toPrefixString());
     }
 
 }
