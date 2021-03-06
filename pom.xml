@@ -7,6 +7,8 @@
         <source.version>1.8</source.version>
         <target.version>1.8</target.version>
         <bintray.repo>andsel/maven</bintray.repo>
+        <netty.version>4.1.56.Final</netty.version>
+        <netty.tcnative.version>2.0.36.Final</netty.tcnative.version>
         <bintray.parent.package>io.moquette.moquette-parent</bintray.parent.package>
     </properties>
 
@@ -20,16 +22,6 @@
     <inceptionYear>2011</inceptionYear>
     <url>http://moquette.io</url>
 
-    <licenses>
-        <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-        <license>
-            <name>Eclipse Public License - Version 1.0</name>
-            <url>http://www.eclipse.org/org/documents/epl-v10.php</url>
-        </license>
-    </licenses>
 
     <developers>
         <developer>
@@ -52,12 +44,77 @@
 
     <modules>
         <module>broker</module>
-        <module>distribution</module>
-        <module>embedding_moquette</module>
+<!--        <module>distribution</module>-->
+<!--        <module>embedding_moquette</module>-->
         <module>message-bridge</module>
+        <module>message-route</module>
     </modules>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-mqtt</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative</artifactId>
+            <version>${netty.tcnative.version}</version>
+            <classifier>linux-x86_64</classifier>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <version>${netty.version}</version>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -80,6 +137,13 @@
             <version>2.6.0</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.awaitility</groupId>
@@ -139,24 +203,5 @@
         </profile>
     </profiles>
 
-    <repositories>
-        <repository>
-            <id>Maven repo</id>
-            <url>https://repo1.maven.org/maven2/</url>
-        </repository>
-
-        <repository>
-            <id>Paho Releases</id>
-            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-        </repository>
-
-        <repository>
-            <id>sonatype-snapshots</id>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </repository>
-    </repositories>
 
 </project>

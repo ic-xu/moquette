@@ -1,24 +1,34 @@
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.StampedLock;
 
 public class Test1 {
 
-
+// -XX:+UseConcMarkSweepGC
     public static void main(String[] args) throws InterruptedException {
 
-        while (true) {
-            System.out.println("ffff");
-            TimeUnit.SECONDS.sleep(3);
-        }
+
+//        CountDownLatch countDownLatch = new CountDownLatch(2);
+//
+//        countDownLatch.countDown();
+//
+//        countDownLatch.await();
+////        ArrayList<String> stringArrayList = new ArrayList<>();
+////
+////        for (;;) {
+////            stringArrayList.add("fffff");
+////        }
+
+        thread();
 
     }
 
-    private void thread() {
-        CyclicBarrier cyclicBarrier = new CyclicBarrier(3, () -> {
+    private static void thread() {
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(2, () -> {
             System.out.println("*********** all end *******");
         });
 
@@ -58,6 +68,20 @@ public class Test1 {
                 e.printStackTrace();
             }
         });
+
+        service.submit(() -> {
+            try {
+                System.out.println("----3-----begin---------");
+                TimeUnit.SECONDS.sleep(5);
+                cyclicBarrier.await();
+                System.out.println("-----3----end---------");
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        });
+
+
+
 
 //        StampedLock lock = new StampedLock();
 //        long l1 = lock.tryOptimisticRead();
