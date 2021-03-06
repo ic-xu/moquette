@@ -4,6 +4,7 @@
 /parser/target/
 /benchmarking/target/
 .idea/
+.mvn/
 *.iml
 broker/target/
 client/target/
@@ -29,7 +30,8 @@ broker/runner
 *.swp
 
 *.class
-
+gilog.log
+.mvn/*
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
