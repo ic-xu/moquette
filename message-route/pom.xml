@@ -11,5 +11,15 @@
 
     <artifactId>message-route</artifactId>
 
+<dependencies>
 
+    <dependency>
+        <groupId>io.moquette</groupId>
+        <artifactId>mqtt-de-encoder</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+
+
+
+</dependencies>
 </project>

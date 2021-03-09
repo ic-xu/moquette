@@ -17,10 +17,10 @@
 package io.moquette.broker;
 
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.mqtt.MqttConnAckMessage;
-import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
-import io.netty.handler.codec.mqtt.MqttSubAckMessage;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
+import io.handler.codec.mqtt.MqttConnAckMessage;
+import io.handler.codec.mqtt.MqttConnectReturnCode;
+import io.handler.codec.mqtt.MqttSubAckMessage;
+import static io.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

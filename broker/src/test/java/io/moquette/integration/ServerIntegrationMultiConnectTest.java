@@ -59,7 +59,7 @@ public class ServerIntegrationMultiConnectTest {
     private String dbPath;
     private static ByteArrayOutputStream STRING_OUT;
 
-    protected void startServer(String dbPath) throws IOException {
+    protected void startServer(String dbPath) throws IOException, InterruptedException {
         server = new Server();
         final Properties configProps = IntegrationUtils.prepareTestProperties(dbPath);
         configuration = new MemoryConfig(configProps);

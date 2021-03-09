@@ -24,9 +24,9 @@ import io.moquette.broker.security.AcceptAllAuthenticator;
 import io.moquette.broker.subscriptions.Topic;
 import io.moquette.broker.security.IAuthorizatorPolicy;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.MqttMessageBuilders;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttMessageBuilders;
+import io.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttQoS;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.junit.After;
@@ -62,7 +62,7 @@ public class ServerIntegrationPahoCanPublishOnReadBlockedTopicTest {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    protected void startServer(String dbPath) {
+    protected void startServer(String dbPath) throws InterruptedException {
         m_server = new Server();
         final Properties configProps = IntegrationUtils.prepareTestProperties(dbPath);
         configProps.setProperty(BrokerConstants.REAUTHORIZE_SUBSCRIPTIONS_ON_CONNECT, "true");

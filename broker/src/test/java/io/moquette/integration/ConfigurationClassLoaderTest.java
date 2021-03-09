@@ -43,7 +43,7 @@ public class ConfigurationClassLoaderTest implements IAuthenticator, IAuthorizat
     public TemporaryFolder tempFolder = new TemporaryFolder();
     private String dbPath;
 
-    protected void startServer(Properties props) throws IOException {
+    protected void startServer(Properties props) throws IOException, InterruptedException {
         m_server = new Server();
         m_config = new MemoryConfig(props);
         m_server.startServer(m_config);

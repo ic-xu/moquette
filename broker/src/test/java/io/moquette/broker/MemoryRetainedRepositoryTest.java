@@ -20,8 +20,8 @@ import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.broker.subscriptions.Topic;
 import io.moquette.persistence.memory.MemoryRetainedRepository;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.MqttMessageBuilders;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttMessageBuilders;
+import io.handler.codec.mqtt.MqttQoS;
 import org.junit.Test;
 
 import java.util.List;

@@ -20,8 +20,8 @@ import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
 import io.moquette.testclient.Client;
-import io.netty.handler.codec.mqtt.*;
-import io.netty.handler.codec.mqtt.MqttMessage;
+import io.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.MqttMessage;
 import org.eclipse.paho.client.mqttv3.*;
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +34,7 @@ import org.awaitility.Awaitility;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
+import static io.handler.codec.mqtt.MqttConnectReturnCode.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 
@@ -52,7 +52,7 @@ public class ServerLowlevelMessagesIntegrationTests {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    protected void startServer(String dbPath) throws IOException {
+    protected void startServer(String dbPath) throws IOException, InterruptedException {
         m_server = new Server();
         final Properties configProps = IntegrationUtils.prepareTestProperties(dbPath);
         m_config = new MemoryConfig(configProps);

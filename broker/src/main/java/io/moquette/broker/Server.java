@@ -18,7 +18,7 @@ import io.moquette.broker.security.*;
 import io.moquette.broker.subscriptions.ISubscriptionsDirectory;
 import io.moquette.broker.security.IAuthenticator;
 import io.moquette.broker.security.IAuthorizatorPolicy;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttPublishMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class Server {
     private H2Builder h2Builder;
     private SessionRegistry sessions;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         final Server server = new Server();
         server.startServer();
         System.out.println("Server started, version 0.14-SNAPSHOT");
@@ -57,7 +57,7 @@ public class Server {
      *
      * @throws IOException in case of any IO error.
      */
-    public void startServer() throws IOException {
+    public void startServer() throws IOException, InterruptedException {
         File defaultConfigurationFile = defaultConfigFile();
         LOG.info("Starting Moquette integration. Configuration file path={}", defaultConfigurationFile.getAbsolutePath());
         IResourceLoader filesystemLoader = new FileResourceLoader(defaultConfigurationFile);
@@ -82,7 +82,7 @@ public class Server {
      * @param configFile text file that contains the configuration.
      * @throws IOException in case of any IO Error.
      */
-    public void startServer(File configFile) throws IOException {
+    public void startServer(File configFile) throws IOException, InterruptedException {
         LOG.info("Starting Moquette integration. Configuration file path: {}", configFile.getAbsolutePath());
         IResourceLoader filesystemLoader = new FileResourceLoader(configFile);
         final IConfig config = new ResourceLoaderConfig(filesystemLoader);
@@ -101,7 +101,7 @@ public class Server {
      * @param configProps the properties maptree to use as configuration.
      * @throws IOException in case of any IO Error.
      */
-    public void startServer(Properties configProps) throws IOException {
+    public void startServer(Properties configProps) throws IOException, InterruptedException {
         LOG.debug("Starting Moquette integration using properties object");
         final IConfig config = new MemoryConfig(configProps);
         startServer(config);
@@ -113,7 +113,7 @@ public class Server {
      * @param config the configuration to use to start the broker.
      * @throws IOException in case of any IO Error.
      */
-    public void startServer(IConfig config) throws IOException {
+    public void startServer(IConfig config) throws IOException, InterruptedException {
         LOG.debug("Starting Moquette integration using IConfig instance");
         startServer(config, null);
     }
@@ -126,13 +126,13 @@ public class Server {
      * @param handlers the handlers to install in the broker.
      * @throws IOException in case of any IO Error.
      */
-    public void startServer(IConfig config, List<? extends InterceptHandler> handlers) throws IOException {
+    public void startServer(IConfig config, List<? extends InterceptHandler> handlers) throws IOException, InterruptedException {
         LOG.debug("Starting moquette integration using IConfig instance and intercept handlers");
         startServer(config, handlers, null, null, null);
     }
 
     public void startServer(IConfig config, List<? extends InterceptHandler> handlers, ISslContextCreator sslCtxCreator,
-                            IAuthenticator authenticator, IAuthorizatorPolicy authorizatorPolicy) {
+                            IAuthenticator authenticator, IAuthorizatorPolicy authorizatorPolicy) throws InterruptedException {
         final long start = System.currentTimeMillis();
         if (handlers == null) {
             handlers = Collections.emptyList();

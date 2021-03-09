@@ -17,7 +17,7 @@
 package io.moquette.interception.messages;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttPublishMessage;
 
 public class InterceptPublishMessage extends InterceptAbstractMessage {
 

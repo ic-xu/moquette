@@ -27,14 +27,14 @@ import io.moquette.persistence.memory.MemoryRetainedRepository;
 import io.moquette.persistence.memory.MemorySubscriptionsRepository;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.mqtt.MqttConnectMessage;
-import io.netty.handler.codec.mqtt.MqttMessageBuilders;
-import io.netty.handler.codec.mqtt.MqttVersion;
+import io.handler.codec.mqtt.MqttConnectMessage;
+import io.handler.codec.mqtt.MqttMessageBuilders;
+import io.handler.codec.mqtt.MqttVersion;
 import org.junit.Before;
 import org.junit.Test;
 
 import static io.moquette.broker.NettyChannelAssertions.assertEqualsConnAck;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
+import static io.handler.codec.mqtt.MqttConnectReturnCode.*;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.*;

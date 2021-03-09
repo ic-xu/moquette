@@ -19,7 +19,7 @@ package io.moquette.broker.subscriptions;
 import io.moquette.broker.subscriptions.nodetree.CNode;
 import io.moquette.broker.subscriptions.nodetree.CTrie;
 import io.moquette.broker.subscriptions.nodetree.INode;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttQoS;
 import org.junit.Before;
 import org.junit.Test;
 

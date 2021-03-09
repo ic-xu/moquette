@@ -16,8 +16,8 @@
 
 package io.moquette.interception.messages;
 
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttMessage;
+import io.handler.codec.mqtt.MqttQoS;
 
 public abstract class InterceptAbstractMessage implements InterceptMessage {
 

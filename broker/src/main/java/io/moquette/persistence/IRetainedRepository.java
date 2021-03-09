@@ -17,7 +17,7 @@ package io.moquette.persistence;
 
 import io.moquette.broker.RetainedMessage;
 import io.moquette.broker.subscriptions.Topic;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttPublishMessage;
 
 import java.util.List;
 

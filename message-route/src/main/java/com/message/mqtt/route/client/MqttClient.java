@@ -4,16 +4,23 @@ import com.message.mqtt.route.client.handler.MqttClientHandler;
 import com.message.mqtt.route.client.protocol.ClientProtocolProcess;
 import com.message.mqtt.route.client.protocol.ClientProtocolUtil;
 import com.message.mqtt.route.client.protocol.MqttConnectOptions;
+import com.message.mqtt.route.client.protocol.MqttProtocolUtil;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.mqtt.MqttDecoder;
-import io.netty.handler.codec.mqtt.MqttEncoder;
-import io.netty.handler.codec.mqtt.MqttVersion;
+import io.handler.codec.mqtt.MqttDecoder;
+import io.handler.codec.mqtt.MqttEncoder;
+import io.handler.codec.mqtt.MqttVersion;
+
+import java.net.InetSocketAddress;
+import java.util.Scanner;
 
 public class MqttClient {
     Bootstrap bootstrap = new Bootstrap();
@@ -37,10 +44,10 @@ public class MqttClient {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        for (int i = 0; i <10 ; i++) {
+//        for (int i = 0; i <10 ; i++) {
             MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-            mqttConnectOptions.setHost("192.168.42.130");
-            mqttConnectOptions.setClientIdentifier("test-000000"+i);
+            mqttConnectOptions.setHost("10.92.33.61");
+            mqttConnectOptions.setClientIdentifier("test-000000"+1);
             mqttConnectOptions.setUserName("admin");
             mqttConnectOptions.setPassword("passwd".getBytes());
             mqttConnectOptions.setHasWillFlag(false);
@@ -49,8 +56,7 @@ public class MqttClient {
             mqttConnectOptions.setHasPassword(true);
             mqttConnectOptions.setMqttVersion(MqttVersion.MQTT_3_1);
             getInstance().doConnect(new Session(mqttConnectOptions));
-        }
-
+//        }
 
     }
 
@@ -79,7 +85,13 @@ public class MqttClient {
             session.setChannel(sync.channel());
             sync.channel().writeAndFlush(ClientProtocolUtil.connectMessage(mqttConnectOptions));
         }
-        ChannelFuture channelFuture = sync.channel().closeFuture();
+        Scanner scanner = new Scanner(System.in);
+        while (true){
+            String s = scanner.nextLine();
+            ByteBuf byteBuf1 = Unpooled.wrappedBuffer(s.getBytes());
+            sync.channel().writeAndFlush(MqttProtocolUtil.customerMessage(false,1,false,byteBuf1));
+        }
+//        ChannelFuture channelFuture = sync.channel().closeFuture();
     }
 
 

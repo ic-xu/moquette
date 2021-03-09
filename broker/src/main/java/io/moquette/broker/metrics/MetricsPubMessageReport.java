@@ -6,7 +6,7 @@ import com.codahale.metrics.Timer;
 import io.moquette.contants.ConstantsTopics;
 import io.moquette.broker.PostOffice;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;

@@ -1,16 +1,19 @@
 package com.message.mqtt.route.client.handler;
 
 import com.message.mqtt.route.client.protocol.ClientProtocolProcess;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.handler.codec.mqtt.MqttConnAckMessage;
-import io.netty.handler.codec.mqtt.MqttFixedHeader;
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import io.netty.handler.codec.mqtt.MqttSubAckMessage;
+import io.handler.codec.mqtt.MqttConnAckMessage;
+import io.handler.codec.mqtt.MqttFixedHeader;
+import io.handler.codec.mqtt.MqttMessage;
+import io.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttSubAckMessage;
 import io.netty.util.concurrent.GlobalEventExecutor;
+
+import java.net.InetSocketAddress;
 
 /**
  * @author ben
@@ -25,6 +28,15 @@ public class MqttClientHandler extends SimpleChannelInboundHandler<Object> {
 
     public MqttClientHandler(ClientProtocolProcess clientProtocolProcess) {
         this.clientProtocolProcess = clientProtocolProcess;
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        Channel channel = ctx.channel();
+        InetSocketAddress socketAddress = (InetSocketAddress)channel.localAddress();
+
+        System.out.println(socketAddress.getPort());
     }
 
     @Override

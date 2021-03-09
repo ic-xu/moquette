@@ -16,7 +16,7 @@
 
 package io.moquette.broker.subscriptions;
 
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttQoS;
 
 import java.io.Serializable;
 

@@ -24,6 +24,9 @@ public class MqttClientWrapping extends org.eclipse.paho.client.mqttv3.MqttClien
     private ClientInfo clientInfo;
 
 
+
+
+
     int[] Qos = {2, 2};
     String[] registerTopics = {"$SYS_METRICS", "$SYS_BROADCASTING"};
 
@@ -42,6 +45,10 @@ public class MqttClientWrapping extends org.eclipse.paho.client.mqttv3.MqttClien
 
     public long getLastTime() {
         return lastTime;
+    }
+
+
+    public void gettetst(){
     }
 
 

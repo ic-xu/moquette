@@ -3,7 +3,7 @@ package io.moquette.broker.subscriptions.maptree;
 import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.broker.subscriptions.Topic;
 import io.moquette.utils.TopicUtils;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttQoS;
 
 import java.util.Set;
 

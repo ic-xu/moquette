@@ -23,6 +23,19 @@
 
 
         <dependency>
+            <groupId>io.moquette</groupId>
+            <artifactId>mqtt-de-encoder</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+
+
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2-mvstore</artifactId>
             <version>${h2.version}</version>

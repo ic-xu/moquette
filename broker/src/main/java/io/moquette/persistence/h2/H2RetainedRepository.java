@@ -4,7 +4,7 @@ import io.moquette.persistence.IRetainedRepository;
 import io.moquette.broker.RetainedMessage;
 import io.moquette.broker.subscriptions.Topic;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttPublishMessage;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 

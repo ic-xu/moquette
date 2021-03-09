@@ -20,12 +20,12 @@ import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.BrokerInterceptor;
 import io.moquette.utils.DebugUtils;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 
 import java.util.Collections;
 import java.util.List;
 
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
+import static io.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
 import static org.junit.Assert.*;
 
 public final class ConnectionTestUtils {

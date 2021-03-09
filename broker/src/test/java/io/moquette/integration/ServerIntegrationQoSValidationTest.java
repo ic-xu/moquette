@@ -51,7 +51,7 @@ public class ServerIntegrationQoSValidationTest {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    protected void startServer(String dbPath) throws IOException {
+    protected void startServer(String dbPath) throws IOException, InterruptedException {
         m_server = new Server();
         final Properties configProps = IntegrationUtils.prepareTestProperties(dbPath);
         m_config = new MemoryConfig(configProps);

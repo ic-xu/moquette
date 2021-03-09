@@ -19,7 +19,7 @@ package io.moquette.broker.subscriptions;
 import io.moquette.broker.subscriptions.nodetree.CTrieSubscriptionDirectory;
 import io.moquette.persistence.ISubscriptionsRepository;
 import io.moquette.persistence.memory.MemorySubscriptionsRepository;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttQoS;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -19,7 +19,7 @@ import io.moquette.persistence.IRetainedRepository;
 import io.moquette.broker.RetainedMessage;
 import io.moquette.broker.subscriptions.Topic;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttPublishMessage;
 
 import java.util.ArrayList;
 import java.util.List;

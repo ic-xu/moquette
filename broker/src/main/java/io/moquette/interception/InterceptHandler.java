@@ -18,7 +18,7 @@ package io.moquette.interception;
 
 import io.moquette.interception.messages.*;
 import io.moquette.broker.subscriptions.Subscription;
-import io.netty.handler.codec.mqtt.MqttMessage;
+import io.handler.codec.mqtt.MqttMessage;
 
 /**
  * This interface is used to inject code for intercepting broker events.

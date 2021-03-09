@@ -18,8 +18,8 @@ package io.moquette.interception;
 
 import io.moquette.interception.messages.InterceptAcknowledgedMessage;
 import io.moquette.broker.subscriptions.Subscription;
-import io.netty.handler.codec.mqtt.MqttConnectMessage;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttConnectMessage;
+import io.handler.codec.mqtt.MqttPublishMessage;
 
 /**
  * This interface is to be used internally by the broker components.

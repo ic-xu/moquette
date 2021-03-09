@@ -1,29 +1,29 @@
 package io.moquette.broker;
 
-import io.moquette.broker.handler.NettyHttpServerHandler;
+import io.moquette.broker.handler.*;
 import io.moquette.contants.BrokerConstants;
 import io.moquette.broker.config.IConfig;
-import io.moquette.broker.handler.AutoFlushHandler;
-import io.moquette.broker.handler.MoquetteIdleTimeoutHandler;
-import io.moquette.broker.handler.NewNettyMQTTHandler;
 import io.moquette.broker.metrics.*;
 import io.moquette.broker.security.ISslContextCreator;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.handler.codec.mqtt.MqttDecoder;
-import io.netty.handler.codec.mqtt.MqttEncoder;
+import io.handler.codec.mqtt.MqttDecoder;
+import io.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -132,7 +132,7 @@ class NewNettyAcceptor {
      * @param postOffice    后面新增的参数，用于发送 Metrics 主题消息
      */
     public void initialize(NewNettyMQTTHandler mqttHandler, IConfig props, ISslContextCreator sslCtxCreator,
-                           PostOffice postOffice,SessionRegistry sessions) {
+                           PostOffice postOffice, SessionRegistry sessions) throws InterruptedException {
         LOG.debug("Initializing Netty acceptor");
 
         nettySoBacklog = props.intProp(BrokerConstants.NETTY_SO_BACKLOG_PROPERTY_NAME, 128);
@@ -187,8 +187,13 @@ class NewNettyAcceptor {
          * init http/https server
          *
          */
-        initializeHttpTransport(mqttHandler, props,sessions);
+        initializeHttpTransport(mqttHandler, props, sessions);
 //        initializeHttpsTransport(mqttHandler, props);
+
+        /**
+         * init UDP
+         */
+        initializeUDPTransport(mqttHandler, props, sessions);
 
 
         /**
@@ -338,7 +343,7 @@ class NewNettyAcceptor {
     }
 
 
-    private void initializeHttpTransport(final NewNettyMQTTHandler handler, IConfig props,SessionRegistry sessions) {
+    private void initializeHttpTransport(final NewNettyMQTTHandler handler, IConfig props, SessionRegistry sessions) {
         LOG.debug("Configuring HTTP MQTT transport");
         String httpPortProp = props.getProperty(HTTP_PORT, "8090");
         int port = Integer.parseInt(httpPortProp);
@@ -361,6 +366,28 @@ class NewNettyAcceptor {
                 p.addLast(new NettyHttpServerHandler(sessions));
             }
         });
+    }
+
+    private void initializeUDPTransport(final NewNettyMQTTHandler handler, IConfig props, SessionRegistry sessions) throws InterruptedException {
+        LOG.debug("Configuring UDP MQTT transport");
+        final MoquetteIdleTimeoutHandler timeoutHandler = new MoquetteIdleTimeoutHandler();
+        String host = props.getProperty(BrokerConstants.HOST_PROPERTY_NAME);
+        String tcpPortProp = props.getProperty(PORT_PROPERTY_NAME, DISABLED_PORT_BIND);
+        if (DISABLED_PORT_BIND.equals(tcpPortProp)) {
+            LOG.info("Property {} has been set to {}. TCP MQTT will be disabled", BrokerConstants.PORT_PROPERTY_NAME,
+                DISABLED_PORT_BIND);
+            return;
+        }
+        int port = Integer.parseInt(tcpPortProp);
+        ChannelFuture sync = new Bootstrap()
+            .group(bossGroup)
+            .channel(NioDatagramChannel.class)
+            .option(ChannelOption.SO_BROADCAST, true)
+            .handler(new NettyUdpServerHandler())
+            .bind(port).sync();
+        LOG.info("Server bound to host={}, port={}, protocol={}", host, port, "UDP");
+        System.out.println(sync.channel());
+        sync.channel().closeFuture().sync();
     }
 
 //    private void initializeHttpsTransport(final NewNettyMQTTHandler handler, IConfig props) {

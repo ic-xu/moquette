@@ -21,7 +21,7 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,8 +88,9 @@ public class MQTTMessageLogger extends ChannelDuplexHandler {
             case PUBREL:
             case PUBACK:
             case UNSUBACK:
-                LOG.info("{} {} <{}> packetID <{}>", direction, messageType, clientID, messageId(msg));
-                break;
+//            case CUSTOMER:
+//                LOG.info("{} {} <{}> packetID <{}>", direction, messageType, clientID, messageId(msg));
+//                break;
             case SUBACK:
                 MqttSubAckMessage suback = (MqttSubAckMessage) msg;
                 final List<Integer> grantedQoSLevels = suback.payload().grantedQoSLevels();

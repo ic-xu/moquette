@@ -12,7 +12,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE;
 import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
-import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
-import static io.netty.handler.codec.mqtt.MqttQoS.*;
+import static io.handler.codec.mqtt.MqttConnectReturnCode.*;
+import static io.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
+import static io.handler.codec.mqtt.MqttQoS.*;
 
 /**
  * message handle core
@@ -58,6 +58,12 @@ public final class MQTTConnection {
         MqttMessageType messageType = msg.fixedHeader().messageType();
         LOG.debug("Received MQTT message, type: {}, channel: {}", messageType, channel);
         switch (messageType) {
+            case CUSTOMER:
+                MqttCustomerMessage message = (MqttCustomerMessage)msg;
+                byte[] bytes = new byte[message.payload().readableBytes()];
+                message.payload().readBytes(bytes);
+                System.out.println(new String(bytes));
+                break;
             case CONNECT:
                 processConnect((MqttConnectMessage) msg);
                 break;

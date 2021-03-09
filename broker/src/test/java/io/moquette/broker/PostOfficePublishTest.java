@@ -32,7 +32,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,9 +40,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import static io.moquette.broker.PostOfficeUnsubscribeTest.CONFIG;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_LEAST_ONCE;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
-import static io.netty.handler.codec.mqtt.MqttQoS.EXACTLY_ONCE;
+import static io.handler.codec.mqtt.MqttQoS.AT_LEAST_ONCE;
+import static io.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
+import static io.handler.codec.mqtt.MqttQoS.EXACTLY_ONCE;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.*;

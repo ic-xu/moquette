@@ -16,7 +16,7 @@
 
 package io.moquette.interception.messages;
 
-import io.netty.handler.codec.mqtt.MqttConnectMessage;
+import io.handler.codec.mqtt.MqttConnectMessage;
 
 import java.nio.charset.StandardCharsets;
 

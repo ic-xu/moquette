@@ -2,8 +2,8 @@
 package io.moquette.broker;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.handler.codec.mqtt.MqttMessage;
+import io.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import java.util.Map;
 
 /**
@@ -20,6 +20,8 @@ public final class Utils {
     }
 
     public static int messageId(MqttMessage msg) {
+        if(null==msg.variableHeader())
+            return 0;
         return ((MqttMessageIdVariableHeader) msg.variableHeader()).messageId();
     }
 

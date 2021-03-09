@@ -9,7 +9,7 @@ import io.moquette.persistence.ISubscriptionsRepository;
 import io.moquette.broker.subscriptions.plugin.imp.DefaultTopics;
 import io.moquette.broker.subscriptions.plugin.imp.IntersectionTopics;
 import io.moquette.broker.subscriptions.plugin.TopicsFilter;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,7 +9,8 @@ import io.moquette.persistence.IRetainedRepository;
 import io.moquette.utils.NettyUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.*;
+import io.netty.channel.socket.DatagramPacket;
+import io.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +18,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.moquette.broker.Utils.messageId;
-import static io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
-import static io.netty.handler.codec.mqtt.MqttQoS.*;
+import static io.handler.codec.mqtt.MqttMessageIdVariableHeader.from;
+import static io.handler.codec.mqtt.MqttQoS.*;
 
 public class PostOffice {
 
@@ -300,6 +301,12 @@ public class PostOffice {
         retainedRepository.retain(topic, msg);
     }
 
+    public void sendMessageUseUdpProtcol(DatagramPacket datagramPacket){
+        if(null!=sessionRegistry.getUdpChannel()){
+            sessionRegistry.getUdpChannel().writeAndFlush(datagramPacket);
+        }
+    }
+
     /**
      * notify MqttConnectMessage after connection established (already pass login).
      *
@@ -316,6 +323,7 @@ public class PostOffice {
     void dispatchConnectionLost(String clientId, String userName) {
         interceptor.notifyClientConnectionLost(clientId, userName);
     }
+
 
 //    void flushInFlight(MQTTConnection mqttConnection) {
 //        Session targetSession = sessionRegistry.retrieve(mqttConnection.getClientId());

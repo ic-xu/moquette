@@ -1,7 +1,8 @@
 package com.message.mqtt.route.client.protocol;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 
 import java.util.List;
 
@@ -12,6 +13,14 @@ import java.util.List;
  **/
 
 public class MqttProtocolUtil {
+
+
+    public static MqttMessage customerMessage(boolean isDup, int qosValue, boolean isRetain,ByteBuf payload) {
+    return new MqttMessage(
+            new MqttFixedHeader(MqttMessageType.CUSTOMER, isDup, MqttQoS.valueOf(qosValue), isRetain, 0),
+            "333",payload);
+    }
+
 	public static MqttUnsubAckMessage unsubAckMessage(int messageId) {
 		return (MqttUnsubAckMessage) MqttMessageFactory.newMessage(
 				new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),

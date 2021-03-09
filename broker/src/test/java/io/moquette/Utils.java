@@ -19,7 +19,7 @@ package io.moquette;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.CorruptedFrameException;
-import io.netty.handler.codec.mqtt.MqttMessage;
+import io.handler.codec.mqtt.MqttMessage;
 import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 

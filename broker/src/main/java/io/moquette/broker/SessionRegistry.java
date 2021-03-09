@@ -9,8 +9,9 @@ import io.moquette.broker.subscriptions.Topic;
 import io.moquette.persistence.IQueueRepository;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.MqttConnectMessage;
-import io.netty.handler.codec.mqtt.MqttQoS;
+import io.netty.channel.Channel;
+import io.handler.codec.mqtt.MqttConnectMessage;
+import io.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,15 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 public class SessionRegistry {
+
+
+    private Channel udpChannel;
+
+    public Channel getUdpChannel() {
+        return udpChannel;
+    }
+
+
 
     public abstract static class EnqueuedMessage {
     }

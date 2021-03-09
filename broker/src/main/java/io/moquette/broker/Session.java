@@ -1,10 +1,11 @@
 package io.moquette.broker;
 
+import io.handler.codec.mqtt.MqttPublishMessage;
 import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.broker.subscriptions.Topic;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

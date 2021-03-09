@@ -1,9 +1,9 @@
 package io.moquette.broker.security;
 
 import io.moquette.broker.subscriptions.Topic;
-import io.netty.handler.codec.mqtt.MqttQoS;
-import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
-import io.netty.handler.codec.mqtt.MqttTopicSubscription;
+import io.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttSubscribeMessage;
+import io.handler.codec.mqtt.MqttTopicSubscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.moquette.broker.Utils.messageId;
-import static io.netty.handler.codec.mqtt.MqttQoS.FAILURE;
+import static io.handler.codec.mqtt.MqttQoS.FAILURE;
 
 public final class Authorizator {
 

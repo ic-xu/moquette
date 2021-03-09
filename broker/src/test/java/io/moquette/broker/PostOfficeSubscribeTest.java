@@ -33,7 +33,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.mqtt.*;
+import io.handler.codec.mqtt.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,9 +43,9 @@ import java.util.Set;
 
 import static io.moquette.broker.PostOfficePublishTest.ALLOW_ANONYMOUS_AND_ZERO_BYTES_CLID;
 import static io.moquette.broker.PostOfficePublishTest.SUBSCRIBER_ID;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
-import static io.netty.handler.codec.mqtt.MqttQoS.EXACTLY_ONCE;
+import static io.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
+import static io.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
+import static io.handler.codec.mqtt.MqttQoS.EXACTLY_ONCE;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;

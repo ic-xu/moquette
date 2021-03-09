@@ -40,7 +40,7 @@ public class ConnectionIT {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    protected void startServer(String dbPath) throws IOException {
+    protected void startServer(String dbPath) throws IOException, InterruptedException {
         final Properties configProps = IntegrationUtils.prepareTestProperties(dbPath);
         m_server = new Server();
         m_server.startServer(configProps);

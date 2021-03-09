@@ -49,7 +49,7 @@ public class ServerIntegrationWebSocketTest {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    protected void startServer(String dbPath) throws IOException {
+    protected void startServer(String dbPath) throws IOException, InterruptedException {
         m_server = new Server();
         final Properties configProps = IntegrationUtils.prepareTestProperties(dbPath);
         configProps.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, Integer.toString(BrokerConstants.WEBSOCKET_PORT));

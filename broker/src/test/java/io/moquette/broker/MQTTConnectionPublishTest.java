@@ -28,10 +28,10 @@ import io.moquette.persistence.memory.MemorySubscriptionsRepository;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.mqtt.MqttMessageBuilders;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import io.netty.handler.codec.mqtt.MqttQoS;
-import io.netty.handler.codec.mqtt.MqttVersion;
+import io.handler.codec.mqtt.MqttMessageBuilders;
+import io.handler.codec.mqtt.MqttPublishMessage;
+import io.handler.codec.mqtt.MqttQoS;
+import io.handler.codec.mqtt.MqttVersion;
 import org.junit.Before;
 import org.junit.Test;
 
