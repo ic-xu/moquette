@@ -8,11 +8,13 @@ import io.moquette.broker.security.IAuthenticator;
 import io.moquette.utils.DebugUtils;
 import io.moquette.utils.NettyUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelPipeline;
 import io.handler.codec.mqtt.*;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +64,8 @@ public final class MQTTConnection {
                 MqttCustomerMessage message = (MqttCustomerMessage)msg;
                 byte[] bytes = new byte[message.payload().readableBytes()];
                 message.payload().readBytes(bytes);
-                System.out.println(new String(bytes));
+                postOffice.sendMessageUseUdpProtcol(new DatagramPacket(Unpooled.wrappedBuffer(bytes),
+                    (InetSocketAddress)channel.remoteAddress()));
                 break;
             case CONNECT:
                 processConnect((MqttConnectMessage) msg);

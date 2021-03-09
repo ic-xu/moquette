@@ -30,7 +30,9 @@ public class SessionRegistry {
         return udpChannel;
     }
 
-
+    public void setUdpChannel(Channel udpChannel) {
+        this.udpChannel = udpChannel;
+    }
 
     public abstract static class EnqueuedMessage {
     }

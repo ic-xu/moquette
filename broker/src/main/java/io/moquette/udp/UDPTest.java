@@ -28,11 +28,10 @@ public class UDPTest {
                         .addLast(new SimpleChannelInboundHandler<DatagramPacket>() {
                             @Override
                             protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
-
-//                                datagramPacket.retain();
-//                                byte[] buf = new byte[datagramPacket.content().readableBytes()];
-//                                datagramPacket.content().readBytes(buf);
-//                                System. out.println(new String(buf));
+                                datagramPacket.retain();
+                                byte[] buf = new byte[datagramPacket.content().readableBytes()];
+                                datagramPacket.content().readBytes(buf);
+                                System. out.println(new String(buf));
                             }
                         })
                     ;

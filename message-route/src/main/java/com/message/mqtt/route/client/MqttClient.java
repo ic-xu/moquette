@@ -8,18 +8,15 @@ import com.message.mqtt.route.client.protocol.MqttProtocolUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.handler.codec.mqtt.MqttDecoder;
 import io.handler.codec.mqtt.MqttEncoder;
 import io.handler.codec.mqtt.MqttVersion;
 
-import java.net.InetSocketAddress;
 import java.util.Scanner;
 
 public class MqttClient {
@@ -92,6 +89,29 @@ public class MqttClient {
             sync.channel().writeAndFlush(MqttProtocolUtil.customerMessage(false,1,false,byteBuf1));
         }
 //        ChannelFuture channelFuture = sync.channel().closeFuture();
+    }
+
+    public void startUDP(Integer port) throws InterruptedException {
+        new Bootstrap()
+            .group(worker)
+            .channel(NioDatagramChannel.class)
+            .option(ChannelOption.SO_BROADCAST, true)
+            .handler(new ChannelInitializer<NioDatagramChannel>() {
+                @Override
+                protected void initChannel(NioDatagramChannel nioDatagramChannel) {
+                    nioDatagramChannel.pipeline()
+                        .addLast(new SimpleChannelInboundHandler<DatagramPacket>() {
+                            @Override
+                            protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
+                                datagramPacket.retain();
+                                byte[] buf = new byte[datagramPacket.content().readableBytes()];
+                                datagramPacket.content().readBytes(buf);
+                                System. out.println(new String(buf));
+                            }
+                        })
+                    ;
+                }
+            }).bind(port).sync();
     }
 
 

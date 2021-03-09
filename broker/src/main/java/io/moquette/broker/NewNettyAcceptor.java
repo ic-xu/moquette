@@ -380,13 +380,15 @@ class NewNettyAcceptor {
         }
         int port = Integer.parseInt(tcpPortProp);
         ChannelFuture sync = new Bootstrap()
-            .group(bossGroup)
+            .group(workerGroup)
             .channel(NioDatagramChannel.class)
             .option(ChannelOption.SO_BROADCAST, true)
+            .option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(64, 1024, 100 * 65536))
             .handler(new NettyUdpServerHandler())
             .bind(port).sync();
         LOG.info("Server bound to host={}, port={}, protocol={}", host, port, "UDP");
         System.out.println(sync.channel());
+        sessions.setUdpChannel(sync.channel());
         sync.channel().closeFuture().sync();
     }
 

@@ -7,8 +7,8 @@
         <source.version>1.8</source.version>
         <target.version>1.8</target.version>
         <bintray.repo>andsel/maven</bintray.repo>
-<!--        <netty.version>4.1.56.Final</netty.version>-->
-        <netty.version>4.1.59.Final-SNAPSHOT</netty.version>
+        <netty.version>4.1.56.Final</netty.version>
+<!--        <netty.version>4.1.59.Final-SNAPSHOT</netty.version>-->
 
         <netty.tcnative.version>2.0.36.Final</netty.tcnative.version>
         <bintray.parent.package>io.moquette.moquette-parent</bintray.parent.package>

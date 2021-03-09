@@ -1,5 +1,6 @@
 package com.message.mqtt.route.client.handler;
 
+import com.message.mqtt.route.client.MqttClient;
 import com.message.mqtt.route.client.protocol.ClientProtocolProcess;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -37,7 +38,10 @@ public class MqttClientHandler extends SimpleChannelInboundHandler<Object> {
         InetSocketAddress socketAddress = (InetSocketAddress)channel.localAddress();
 
         System.out.println(socketAddress.getPort());
+        MqttClient.getInstance().startUDP(socketAddress.getPort());
     }
+
+
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msgx) throws Exception {
