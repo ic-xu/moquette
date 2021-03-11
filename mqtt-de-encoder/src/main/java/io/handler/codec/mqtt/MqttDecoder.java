@@ -197,8 +197,9 @@ public final class MqttDecoder extends ReplayingDecoder<MqttDecoder.DecoderState
             case AUTH:
                 return decodeReasonCodeAndPropertiesVariableHeader(buffer);
 
-            case PINGREQ:
             case CUSTOMER:
+                return decodeCustomerVariableHeader(buffer);
+            case PINGREQ:
             case PINGRESP:
                 // Empty variable header
                 return new Result<Object>(null, 0);
@@ -263,6 +264,11 @@ public final class MqttDecoder extends ReplayingDecoder<MqttDecoder.DecoderState
             keepAlive,
             properties);
         return new Result<MqttConnectVariableHeader>(mqttConnectVariableHeader, numberOfBytesConsumed);
+    }
+
+    private static Result<MqttCustomerVariableHeader> decodeCustomerVariableHeader(ByteBuf buffer) {
+        MqttCustomerVariableHeader mqttCustomerVariableHeader = new MqttCustomerVariableHeader(buffer.readShort());
+        return new Result<MqttCustomerVariableHeader>(mqttCustomerVariableHeader, 2);
     }
 
     private static Result<MqttConnAckVariableHeader> decodeConnAckVariableHeader(

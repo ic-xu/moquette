@@ -25,14 +25,16 @@ public class MqttClient {
 
     private static volatile MqttClient instance;
 
+    private Channel udpChannel;
+
     private MqttClient() {
         init();
     }
 
-    public static MqttClient getInstance(){
-        if(null==instance){
-            synchronized (MqttClient.class){
-                if(null == instance){
+    public static MqttClient getInstance() {
+        if (null == instance) {
+            synchronized (MqttClient.class) {
+                if (null == instance) {
                     instance = new MqttClient();
                 }
             }
@@ -42,17 +44,19 @@ public class MqttClient {
 
     public static void main(String[] args) throws InterruptedException {
 //        for (int i = 0; i <10 ; i++) {
-            MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-            mqttConnectOptions.setHost("10.92.33.61");
-            mqttConnectOptions.setClientIdentifier("test-000000"+1);
-            mqttConnectOptions.setUserName("admin");
-            mqttConnectOptions.setPassword("passwd".getBytes());
-            mqttConnectOptions.setHasWillFlag(false);
-            mqttConnectOptions.setHasCleanSession(false);
-            mqttConnectOptions.setHasUserName(true);
-            mqttConnectOptions.setHasPassword(true);
-            mqttConnectOptions.setMqttVersion(MqttVersion.MQTT_3_1);
-            getInstance().doConnect(new Session(mqttConnectOptions));
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+        mqttConnectOptions.setHost("10.92.33.61");
+        mqttConnectOptions.setClientIdentifier("test-000000" + 1);
+        mqttConnectOptions.setUserName("admin");
+        mqttConnectOptions.setPassword("passwd".getBytes());
+        mqttConnectOptions.setHasWillFlag(false);
+        mqttConnectOptions.setHasCleanSession(false);
+        mqttConnectOptions.setHasUserName(true);
+        mqttConnectOptions.setHasPassword(true);
+        mqttConnectOptions.setMqttVersion(MqttVersion.MQTT_3_1);
+        getInstance().doConnectUDP();
+        getInstance().doConnect(new Session(mqttConnectOptions));
+
 //        }
 
     }
@@ -74,19 +78,43 @@ public class MqttClient {
             });
     }
 
+    void doConnectUDP() throws InterruptedException {
+        ChannelFuture sync = new Bootstrap()
+            .group(worker)
+            .channel(NioDatagramChannel.class)
+            .option(ChannelOption.SO_BROADCAST, true)
+            .handler(new ChannelInitializer<NioDatagramChannel>() {
+                @Override
+                protected void initChannel(NioDatagramChannel nioDatagramChannel) {
+                    nioDatagramChannel.pipeline()
+                        .addLast(new SimpleChannelInboundHandler<DatagramPacket>() {
+                            @Override
+                            protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
+                                datagramPacket.retain();
+                                byte[] buf = new byte[datagramPacket.content().readableBytes()];
+                                datagramPacket.content().readBytes(buf);
+                                System.out.println(new String(buf));
+                            }
+                        })
+                    ;
+                }
+            }).bind(0).sync();
+        udpChannel = sync.channel();
+    }
+
 
     public void doConnect(Session session) throws InterruptedException {
         MqttConnectOptions mqttConnectOptions = session.getMqttConnectOptions();
         ChannelFuture sync = bootstrap.connect(mqttConnectOptions.getHost(), mqttConnectOptions.getPort()).sync();
-        if(sync.isSuccess()){
+        if (sync.isSuccess()) {
             session.setChannel(sync.channel());
             sync.channel().writeAndFlush(ClientProtocolUtil.connectMessage(mqttConnectOptions));
         }
         Scanner scanner = new Scanner(System.in);
-        while (true){
+        while (true) {
             String s = scanner.nextLine();
             ByteBuf byteBuf1 = Unpooled.wrappedBuffer(s.getBytes());
-            sync.channel().writeAndFlush(MqttProtocolUtil.customerMessage(false,1,false,byteBuf1));
+            sync.channel().writeAndFlush(MqttProtocolUtil.customerMessage(false, 1, false, byteBuf1));
         }
 //        ChannelFuture channelFuture = sync.channel().closeFuture();
     }
@@ -106,7 +134,7 @@ public class MqttClient {
                                 datagramPacket.retain();
                                 byte[] buf = new byte[datagramPacket.content().readableBytes()];
                                 datagramPacket.content().readBytes(buf);
-                                System. out.println(new String(buf));
+                                System.out.println(new String(buf));
                             }
                         })
                     ;
@@ -114,5 +142,11 @@ public class MqttClient {
             }).bind(port).sync();
     }
 
+
+    public void sendUDPMessage(DatagramPacket datagramPacket) {
+        if(null!=udpChannel){
+            udpChannel.writeAndFlush(datagramPacket);
+        }
+    }
 
 }

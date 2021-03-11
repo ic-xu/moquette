@@ -11,6 +11,9 @@ public final class MqttMessageFactory {
 
     public static MqttMessage newMessage(MqttFixedHeader mqttFixedHeader, Object variableHeader, Object payload) {
         switch (mqttFixedHeader.messageType()) {
+            case CUSTOMER:
+                return new MqttCustomerMessage(mqttFixedHeader,(MqttCustomerVariableHeader) variableHeader,(ByteBuf)payload);
+
             case CONNECT :
                 return new MqttConnectMessage(
                         mqttFixedHeader,
@@ -68,9 +71,6 @@ public final class MqttMessageFactory {
                 //Having MqttReasonCodeAndPropertiesVariableHeader
                 return new MqttMessage(mqttFixedHeader,
                         (MqttReasonCodeAndPropertiesVariableHeader) variableHeader);
-
-            case CUSTOMER:
-                return new MqttCustomerMessage(mqttFixedHeader,variableHeader,(ByteBuf)payload);
 
             default:
                 throw new IllegalArgumentException("unknown message type: " + mqttFixedHeader.messageType());

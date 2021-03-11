@@ -1,0 +1,10 @@
+
+swagger:
+  enable: true
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/mqtt_register
+    password: root
+    username: root
+  jpa:
+    generate-ddl: false

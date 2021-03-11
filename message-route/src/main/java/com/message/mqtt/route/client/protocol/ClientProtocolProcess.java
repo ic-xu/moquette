@@ -1,17 +1,12 @@
 package com.message.mqtt.route.client.protocol;
+import com.message.mqtt.route.client.MqttClient;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.handler.codec.mqtt.*;
+import io.netty.channel.socket.DatagramPacket;
 
-import java.util.Scanner;
-
-/**
- * @author ben
- * @Title: basic
- * @Description:
- * B-borker; S-Subribler; P-Publisher
- **/
+import java.net.InetSocketAddress;
 
 public class ClientProtocolProcess {
 
@@ -28,6 +23,9 @@ public class ClientProtocolProcess {
 		switch (mqttConnAckVariableHeader.connectReturnCode()) {
 		case CONNECTION_ACCEPTED:
 //			clientProcess.loginFinish(true, null);
+            ByteBuf byteBuf1 = Unpooled.wrappedBuffer("ffffff".getBytes());
+            DatagramPacket datagramPacket = new DatagramPacket(byteBuf1, new InetSocketAddress("34.249.122.178", 1883));
+            MqttClient.getInstance().sendUDPMessage(datagramPacket);
 			return;
 		case CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
 			sErrorMsg = "用户名密码错误";

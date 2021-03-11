@@ -1,13 +1,14 @@
 package pushmanager.core;
 
+import io.client.mqttv3.MqttException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import pushmanager.core.mode.ClientInfo;
 import pushmanager.core.mode.ClientInfoRepository;
 import pushmanager.utils.IPStringUtils;
 import pushmanager.utils.SpringbootApplicationUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,19 +60,27 @@ public class MqttConnectManager {
     }
 
     class ConnectWork implements Runnable {
-        @SneakyThrows
         @Override
         public void run() {
-            ClientInfoRepository clientInfoRepository = SpringbootApplicationUtils.getBean(ClientInfoRepository.class);
-            List<ClientInfo> clientInfos = clientInfoRepository.findAll();
+//            ClientInfoRepository clientInfoRepository = SpringbootApplicationUtils.getBean(ClientInfoRepository.class);
+//            List<ClientInfo> clientInfos = clientInfoRepository.findAll();
+            List<ClientInfo> clientInfos = new ArrayList<>();
+            ClientInfo clientInfo1 = new ClientInfo();
+            clientInfo1.setOutIp("10.92.33.61:1883");
+            clientInfos.add(clientInfo1);
             for (ClientInfo clientInfo : clientInfos) {
                 if (null != clientInfo && !metricsStatusQueue.containsKey(IPStringUtils.getUrl(clientInfo.getOutIp(), clientInfo.getPort()))) {
-                    MqttClientWrapping mqttClientWrapping = new MqttClientWrapping(
-                            IPStringUtils.getUrl(clientInfo.getInnerIp(), clientInfo.getPort()),
-                            clientInfo.getUsername(),
-                            clientInfo.getPassword(),
-                            false,
-                            Constant.keepAliveTime, clientInfo);
+                    MqttClientWrapping mqttClientWrapping = null;
+                    try {
+                        mqttClientWrapping = new MqttClientWrapping(
+                                IPStringUtils.getUrl(clientInfo.getInnerIp(), clientInfo.getPort()),
+                                clientInfo.getUsername(),
+                                clientInfo.getPassword(),
+                                false,
+                                Constant.keepAliveTime, clientInfo);
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
                     mqttClientWrapping.startClient();
                     metricsStatusQueue.put(IPStringUtils.getUrl(clientInfo.getOutIp(), clientInfo.getPort()), mqttClientWrapping);
                 }

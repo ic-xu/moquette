@@ -16,9 +16,9 @@
 
 package io.moquette.integration;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import io.client.mqttv3.IMqttDeliveryToken;
+import io.client.mqttv3.MqttCallback;
+import io.client.mqttv3.MqttMessage;
 import java.util.concurrent.*;
 
 /**

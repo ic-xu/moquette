@@ -51,6 +51,7 @@
         <module>message-bridge</module>
         <module>message-route</module>
         <module>mqtt-de-encoder</module>
+        <module>client-mqttv3</module>
     </modules>
 
     <dependencies>

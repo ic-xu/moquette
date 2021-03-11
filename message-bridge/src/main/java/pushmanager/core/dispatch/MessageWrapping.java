@@ -1,9 +1,8 @@
 package pushmanager.core.dispatch;
 
+import io.client.mqttv3.MqttMessage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 
 @Data
 @AllArgsConstructor

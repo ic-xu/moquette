@@ -52,7 +52,7 @@ public class UDPTest {
         while (true){
             String s = scanner.nextLine();
             ByteBuf byteBuf1 = Unpooled.wrappedBuffer(s.getBytes());
-            DatagramPacket datagramPacket = new DatagramPacket(byteBuf1, new InetSocketAddress("127.0.0.1", 1883));
+            DatagramPacket datagramPacket = new DatagramPacket(byteBuf1, new InetSocketAddress("34.249.122.178", 1883));
             channel.writeAndFlush(datagramPacket);
         }
 

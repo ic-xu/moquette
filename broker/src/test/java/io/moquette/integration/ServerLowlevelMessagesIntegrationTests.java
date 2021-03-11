@@ -22,7 +22,7 @@ import io.moquette.broker.config.MemoryConfig;
 import io.moquette.testclient.Client;
 import io.handler.codec.mqtt.*;
 import io.handler.codec.mqtt.MqttMessage;
-import org.eclipse.paho.client.mqttv3.*;
+import io.client.mqttv3.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -126,7 +126,7 @@ public class ServerLowlevelMessagesIntegrationTests {
             .untilAsserted(() -> {
                 // but after the 2 KEEP ALIVE timeout expires it gets fired,
                 // NB it's 1,5 * KEEP_ALIVE so 3 secs and some millis to propagate the message
-                org.eclipse.paho.client.mqttv3.MqttMessage msg = m_messageCollector.getMessageImmediate();
+                io.client.mqttv3.MqttMessage msg = m_messageCollector.getMessageImmediate();
                 assertNotNull("the will message should be fired after keep alive!", msg);
                 // the will message hasn't to be received before the elapsing of Keep Alive timeout
                 assertTrue(System.currentTimeMillis() - connectTime > 3000);
@@ -161,7 +161,7 @@ public class ServerLowlevelMessagesIntegrationTests {
         m_client.close();
 
         // Verify will testament is published
-        org.eclipse.paho.client.mqttv3.MqttMessage receivedTestament = m_messageCollector.waitMessage(1);
+        io.client.mqttv3.MqttMessage receivedTestament = m_messageCollector.waitMessage(1);
         assertEquals(willTestamentMsg, new String(receivedTestament.getPayload(), UTF_8));
         m_willSubscriber.disconnect();
     }

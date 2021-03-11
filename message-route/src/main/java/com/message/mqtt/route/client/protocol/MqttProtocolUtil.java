@@ -15,10 +15,10 @@ import java.util.List;
 public class MqttProtocolUtil {
 
 
-    public static MqttMessage customerMessage(boolean isDup, int qosValue, boolean isRetain,ByteBuf payload) {
-    return new MqttMessage(
+    public static MqttCustomerMessage customerMessage(boolean isDup, int qosValue, boolean isRetain,ByteBuf payload) {
+    return new MqttCustomerMessage(
             new MqttFixedHeader(MqttMessageType.CUSTOMER, isDup, MqttQoS.valueOf(qosValue), isRetain, 0),
-            "333",payload);
+            new MqttCustomerVariableHeader((short)333) ,payload);
     }
 
 	public static MqttUnsubAckMessage unsubAckMessage(int messageId) {

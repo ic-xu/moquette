@@ -1,7 +1,7 @@
 package pushmanager.core.dispatch;
 
+import io.client.mqttv3.MqttException;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import pushmanager.core.MqttClientWrapping;
 import pushmanager.core.MqttConnectManager;
 

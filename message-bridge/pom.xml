@@ -24,10 +24,17 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.paho</groupId>-->
+<!--            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>-->
+<!--            <version>1.2.5</version>-->
+<!--        </dependency>-->
+
+
         <dependency>
-            <groupId>org.eclipse.paho</groupId>
-            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>1.2.5</version>
+            <groupId>io.moquette</groupId>
+            <artifactId>client.mqttv3</artifactId>
+            <version>0.14-SNAPSHOT</version>
         </dependency>
 
         <dependency>

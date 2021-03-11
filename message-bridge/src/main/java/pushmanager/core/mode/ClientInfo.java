@@ -16,19 +16,19 @@ import javax.persistence.Id;
 public class ClientInfo {
 
     @Id
-    private Integer id;
+    private Integer id = 0;
 
-    private String outIp;
+    private String outIp = "10.92.33.61";
 
-    private String innerIp;
+    private String innerIp = "10.92.33.61";
 
-    private int port;
+    private int port=1883;
 
-    private int sslPort;
+    private int sslPort=8883;
 
-    private String password;
+    private String password="admin";
 
-    private String username;
+    private String username="passwd";
 
 
     /*

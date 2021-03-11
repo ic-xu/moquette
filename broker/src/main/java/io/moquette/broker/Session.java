@@ -12,10 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -84,6 +81,7 @@ public class Session {
     private Set<Subscription> subscriptions = new HashSet<>();
     private final Map<Integer, SessionRegistry.EnqueuedMessage> inflightWindow = new ConcurrentHashMap<>();
     private final DelayQueue<InFlightPacket> inflightTimeouts = new DelayQueue<>();
+//    private final LinkedBlockingDeque<MqttCustomerMessage> mqttCustomerMessagesQueue = new LinkedBlockingDeque<>();
     private final Map<Integer, MqttPublishMessage> qos2Receiving = new ConcurrentHashMap<>();
     private final AtomicInteger inflightSlots = new AtomicInteger(INFLIGHT_WINDOW_SIZE); // this should be configurable
 
@@ -269,6 +267,11 @@ public class Session {
             final SessionRegistry.PublishedMessage msg = new SessionRegistry.PublishedMessage(topic, qos, payload);
             sessionQueue.add(msg);
         }
+    }
+
+
+    public void sendCustomerMessage(MqttMessage mqttMessage){
+        mqttConnection.sendIfWritableElseDrop(mqttMessage);
     }
 
     private void sendPublishQos2(Topic topic, MqttQoS qos, ByteBuf payload) {

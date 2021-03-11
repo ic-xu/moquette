@@ -1,7 +1,7 @@
 package pushmanager.core;
 
+import io.client.mqttv3.*;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.*;
 import pushmanager.core.dispatch.MessageDispatch;
 import pushmanager.core.dispatch.MessageWrapping;
 import pushmanager.core.mode.ClientInfo;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j(topic = "MqttClientWrapping")
-public class MqttClientWrapping extends org.eclipse.paho.client.mqttv3.MqttClient implements Runnable {
+public class MqttClientWrapping extends MqttClient implements Runnable {
 
     private long lastTime;
     private String userName;
@@ -93,7 +93,7 @@ public class MqttClientWrapping extends org.eclipse.paho.client.mqttv3.MqttClien
     }
 
 
-    public org.eclipse.paho.client.mqttv3.MqttClient getMqttClient() {
+    public MqttClient getMqttClient() {
         return this;
     }
 
@@ -102,7 +102,7 @@ public class MqttClientWrapping extends org.eclipse.paho.client.mqttv3.MqttClien
         startClient();
     }
 
-    private class BtcMqttCallback implements MqttCallbackExtended {
+    public class BtcMqttCallback implements MqttCallbackExtended {
 
         public void connectionLost(Throwable cause) {
             log.info(getServerURI() + ":  connection lost");

@@ -1,6 +1,6 @@
 package pushmanager;
 
-import org.eclipse.paho.client.mqttv3.*;
+import io.client.mqttv3.*;
 
 import javax.net.ssl.*;
 import java.io.File;

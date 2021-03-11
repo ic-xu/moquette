@@ -45,7 +45,7 @@ public final class MqttEncoder extends MessageToMessageEncoder<MqttMessage> {
 
         switch (message.fixedHeader().messageType()) {
             case CUSTOMER:
-                return encodeCustomerMessage(ctx, message);
+                return encodeCustomerMessage(ctx, (MqttCustomerMessage) message);
             case CONNECT:
                 return encodeConnectMessage(ctx, (MqttConnectMessage) message);
 
@@ -398,14 +398,15 @@ public final class MqttEncoder extends MessageToMessageEncoder<MqttMessage> {
         }
     }
 
-    private static ByteBuf encodeCustomerMessage(ChannelHandlerContext ctx, MqttMessage message) {
+    private static ByteBuf encodeCustomerMessage(ChannelHandlerContext ctx, MqttCustomerMessage message) {
         MqttFixedHeader mqttFixedHeader = message.fixedHeader();
         ByteBuf payload = ((ByteBuf) message.payload()).duplicate();
-        int fixedHeaderBufferSize = 1 + getVariableLengthInt(payload.readableBytes());
+        int fixedHeaderBufferSize = 3 + getVariableLengthInt(payload.readableBytes());
         ByteBuf buf = ctx.alloc().buffer(fixedHeaderBufferSize + payload.readableBytes());
 //        int fixedHeaderByte1 = getFixedHeaderByte1(mqttFixedHeader);
         buf.writeByte(getFixedHeaderByte1(mqttFixedHeader));
-        writeVariableLengthInt(buf,payload.readableBytes());
+        writeVariableLengthInt(buf, payload.readableBytes() + 2);
+        buf.writeShort(message.variableHeader().getPackageId());
         buf.writeBytes(payload);
 
 

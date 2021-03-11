@@ -3,23 +3,23 @@ package io.moquette.broker;
 import io.moquette.broker.config.BrokerConfiguration;
 import io.moquette.broker.expression.SessionCorruptedException;
 import io.moquette.broker.handler.InflightResenderHandler;
+import io.moquette.broker.handler.videotransfer.NettyCustomerTcpHandler;
 import io.moquette.broker.subscriptions.Topic;
 import io.moquette.broker.security.IAuthenticator;
 import io.moquette.utils.DebugUtils;
 import io.moquette.utils.NettyUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelPipeline;
 import io.handler.codec.mqtt.*;
-import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,8 +64,15 @@ public final class MQTTConnection {
                 MqttCustomerMessage message = (MqttCustomerMessage)msg;
                 byte[] bytes = new byte[message.payload().readableBytes()];
                 message.payload().readBytes(bytes);
-                postOffice.sendMessageUseUdpProtcol(new DatagramPacket(Unpooled.wrappedBuffer(bytes),
-                    (InetSocketAddress)channel.remoteAddress()));
+                NettyCustomerTcpHandler.handleMessage(new String(bytes,StandardCharsets.UTF_8));
+                Session retrieve = sessionRegistry.retrieve(NettyUtils.clientID(channel));
+                retrieve.sendCustomerMessage(msg);
+
+//                channel.writeAndFlush(msg);
+//                InetSocketAddress socketAddress =  (InetSocketAddress)channel.remoteAddress();
+//                postOffice.sendMessageUseUdpProtcol(new DatagramPacket(Unpooled.wrappedBuffer(bytes),
+//                    socketAddress));
+//                System.out.println(socketAddress.getAddress()+"----------"+socketAddress.getPort()+"------"+socketAddress.getHostName());
                 break;
             case CONNECT:
                 processConnect((MqttConnectMessage) msg);
@@ -129,7 +136,7 @@ public final class MQTTConnection {
     /**
      * 连接处理类
      *
-     * @param msg
+     * @param msg msg
      */
     void processConnect(MqttConnectMessage msg) {
         MqttConnectPayload payload = msg.payload();
