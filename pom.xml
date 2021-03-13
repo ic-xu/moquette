@@ -25,33 +25,26 @@
     <url>http://moquette.io</url>
 
 
-    <developers>
-        <developer>
-            <id>andsel</id>
-            <name>Andrea Selva</name>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-                <role>founder</role>
-            </roles>
-            <timezone>+1</timezone>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:git@github.com:moquette-io/moquette.git</connection>
-        <developerConnection>scm:git:git@github.com:moquette-io/moquette.git</developerConnection>
-        <url>git@github.com:moquette-io/moquette.git</url>
-    </scm>
+<!--    <developers>-->
+<!--        <developer>-->
+<!--            <id>andsel</id>-->
+<!--            <name>Andrea Selva</name>-->
+<!--            <roles>-->
+<!--                <role>architect</role>-->
+<!--                <role>developer</role>-->
+<!--                <role>founder</role>-->
+<!--            </roles>-->
+<!--            <timezone>+1</timezone>-->
+<!--        </developer>-->
+<!--    </developers>-->
 
     <modules>
         <module>broker</module>
-<!--        <module>distribution</module>-->
-<!--        <module>embedding_moquette</module>-->
         <module>message-bridge</module>
         <module>message-route</module>
         <module>mqtt-de-encoder</module>
         <module>client-mqttv3</module>
+        <module>mqtt-client</module>
     </modules>
 
     <dependencies>
@@ -91,12 +84,6 @@
             <artifactId>netty-codec-http</artifactId>
             <version>${netty.version}</version>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-codec-mqtt</artifactId>-->
-<!--            <version>${netty.version}</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>io.netty</groupId>

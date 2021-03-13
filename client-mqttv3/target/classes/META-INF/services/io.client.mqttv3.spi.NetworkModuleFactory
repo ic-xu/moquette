@@ -1,5 +1,0 @@
-# build in NetworkModules
-io.client.mqttv3.internal.TCPNetworkModuleFactory
-io.client.mqttv3.internal.SSLNetworkModuleFactory
-io.client.mqttv3.internal.websocket.WebSocketNetworkModuleFactory
-io.client.mqttv3.internal.websocket.WebSocketSecureNetworkModuleFactory
