@@ -20,6 +20,8 @@ broker/runner
 /osgi_test/target/
 /perf/target/
 /mapdb_storage/target/
+client-mqttv3/target/
+mqtt-de-encoder/target/
 *~
 *.log*
 .DS_Store
